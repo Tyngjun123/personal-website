@@ -1,0 +1,85 @@
+---
+// src/pages/index.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../config/site';
+---
+
+<BaseLayout>
+  <section class="container hero">
+    <p class="hero-eyebrow">{SITE.location}</p>
+    <h1 class="hero-name">{SITE.author}</h1>
+    <p class="hero-role">{SITE.authorRole}</p>
+    <p class="hero-bio">{SITE.authorBio}</p>
+    <div class="hero-actions">
+      <a href="/articles" class="btn-primary">Read Articles</a>
+      <a href="/projects" class="btn-secondary">View Projects</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding: 6rem 2rem;
+    max-width: var(--content-width);
+  }
+
+  .hero-eyebrow {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .hero-name {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-role {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-bio {
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    line-height: 1.75;
+    margin-bottom: 2.5rem;
+    max-width: 520px;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    padding: 0.6rem 1.25rem;
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    transition: opacity 0.15s;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.8;
+  }
+
+  .btn-secondary {
+    padding: 0.6rem 1.25rem;
+    border: 0.5px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .btn-secondary:hover {
+    color: var(--color-text);
+    border-color: var(--color-text);
+  }
+</style>

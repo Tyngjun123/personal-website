@@ -1,0 +1,123 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { isConfigured, listDir, getFile, deleteFile, parseMdx } from '../../../../lib/github';
+
+const configured = isConfigured();
+let articles: any[] = [];
+let errorMsg = '';
+let successMsg = '';
+
+const ARTICLES_PATH = 'src/content/articles';
+
+// Handle delete
+if (Astro.request.method === 'POST' && configured) {
+  const form = await Astro.request.formData();
+  const action = form.get('_action')?.toString();
+  const slug = form.get('slug')?.toString();
+  if (action === 'delete' && slug) {
+    try {
+      const filePath = `${ARTICLES_PATH}/${slug}.mdx`;
+      const file = await getFile(filePath);
+      await deleteFile(filePath, file.sha, `CMS: delete article ${slug}`);
+      successMsg = `Article "${slug}" deleted. Rebuilding…`;
+    } catch (e: any) {
+      errorMsg = e.message;
+    }
+  }
+}
+
+// Load article list
+if (configured) {
+  try {
+    const files = await listDir(ARTICLES_PATH);
+    const mdxFiles = files.filter(f => f.name.endsWith('.mdx'));
+    articles = await Promise.all(
+      mdxFiles.map(async f => {
+        try {
+          const file = await getFile(f.path);
+          const { data } = parseMdx(file.content);
+          return { slug: f.name.replace('.mdx', ''), title: data.title ?? f.name, publishedDate: data.publishedDate ?? '', category: data.category ?? '', draft: data.draft ?? false };
+        } catch { return { slug: f.name.replace('.mdx', ''), title: f.name, publishedDate: '', category: '', draft: false }; }
+      })
+    );
+    articles.sort((a, b) => b.publishedDate.localeCompare(a.publishedDate));
+  } catch (e: any) {
+    errorMsg = e.message;
+  }
+}
+---
+
+<AdminLayout title="Articles">
+  {!configured && <div class="notice">GitHub not configured. Add <code>GITHUB_TOKEN</code>, <code>GITHUB_OWNER</code>, <code>GITHUB_REPO</code> to Vercel env vars.</div>}
+  {successMsg && <div class="alert alert-ok">{successMsg}</div>}
+  {errorMsg   && <div class="alert alert-err">{errorMsg}</div>}
+
+  <div class="list-header">
+    <span class="list-count">{articles.length} article{articles.length !== 1 ? 's' : ''}</span>
+    <a href="/admin/cms/articles/edit" class="btn-new">+ New article</a>
+  </div>
+
+  {articles.length === 0 && configured && !errorMsg && (
+    <p class="empty">No articles yet. <a href="/admin/cms/articles/edit">Create one →</a></p>
+  )}
+
+  <ul class="item-list">
+    {articles.map(a => (
+      <li class="item">
+        <div class="item-info">
+          <div class="item-title">
+            {a.draft && <span class="draft-badge">Draft</span>}
+            {a.title}
+          </div>
+          <div class="item-meta">{a.category}{a.publishedDate ? ` · ${a.publishedDate}` : ''}</div>
+        </div>
+        <div class="item-actions">
+          <a href={`/articles/${a.slug}`} target="_blank" class="btn-action">View</a>
+          <a href={`/admin/cms/articles/edit?slug=${a.slug}`} class="btn-action">Edit</a>
+          <form method="POST" onsubmit="return confirm('Delete this article?')">
+            <input type="hidden" name="_action" value="delete" />
+            <input type="hidden" name="slug" value={a.slug} />
+            <button type="submit" class="btn-action btn-delete">Delete</button>
+          </form>
+        </div>
+      </li>
+    ))}
+  </ul>
+</AdminLayout>
+
+<style>
+  .notice { background:#1a1200;border:1px solid #3d2e00;color:#fbbf24;padding:1rem 1.25rem;border-radius:8px;margin-bottom:1.5rem;font-size:.82rem; }
+  code { background:#2d2200;padding:1px 5px;border-radius:3px;font-family:monospace;font-size:.82em; }
+  .alert { padding:.75rem 1rem;border-radius:6px;font-size:.82rem;margin-bottom:1.25rem; }
+  .alert-ok  { background:#0a1f15;border:1px solid #064e3b;color:#34d399; }
+  .alert-err { background:#1f0a0a;border:1px solid #7f1d1d;color:#f87171; }
+
+  .list-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem; }
+  .list-count { font-size:.82rem;color:#4b5563; }
+
+  .btn-new {
+    background:#f9fafb;border-radius:6px;color:#0f0f0f;font-size:.8rem;
+    font-weight:500;padding:.45rem 1rem;transition:opacity .15s;
+  }
+  .btn-new:hover { opacity:.85; }
+
+  .empty { color:#4b5563;font-size:.85rem; }
+  .empty a { color:#6b7280;text-decoration:underline; }
+
+  .item-list { list-style:none;display:flex;flex-direction:column; }
+  .item { display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.875rem 0;border-bottom:1px solid #1f1f1f; }
+  .item-info { flex:1;min-width:0; }
+  .item-title { font-size:.875rem;color:#d1d5db;margin-bottom:3px;display:flex;align-items:center;gap:8px; }
+  .item-meta { font-size:.75rem;color:#4b5563; }
+  .draft-badge { font-size:.65rem;padding:2px 7px;border-radius:4px;background:#2d1f00;color:#fbbf24; }
+
+  .item-actions { display:flex;gap:8px;flex-shrink:0; }
+  .btn-action {
+    font-size:.75rem;padding:.35rem .75rem;border-radius:5px;
+    background:#1f1f1f;border:1px solid #2d2d2d;color:#9ca3af;cursor:pointer;
+    font-family:inherit;transition:background .15s;text-decoration:none;display:inline-block;
+  }
+  .btn-action:hover { background:#2d2d2d; }
+  .btn-delete:hover { background:#2d1515;border-color:#7f1d1d;color:#f87171; }
+</style>

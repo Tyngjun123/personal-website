@@ -1,0 +1,264 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { put } from '@vercel/blob';
+
+let uploadedUrl = '';
+let uploadError = '';
+let uploadedName = '';
+
+const blobConfigured = !!process.env.BLOB_READ_WRITE_TOKEN;
+
+if (Astro.request.method === 'POST' && blobConfigured) {
+  try {
+    const form = await Astro.request.formData();
+    const file = form.get('file') as File | null;
+    const folder = form.get('folder')?.toString() ?? 'images';
+
+    if (!file || file.size === 0) {
+      uploadError = 'No file selected.';
+    } else if (file.size > 4 * 1024 * 1024) {
+      uploadError = 'File too large. Maximum size is 4MB.';
+    } else {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-').toLowerCase();
+      const blob = await put(`${folder}/${safeName}`, file, { access: 'public' });
+      uploadedUrl = blob.url;
+      uploadedName = safeName;
+    }
+  } catch (e: any) {
+    uploadError = e?.message ?? 'Upload failed.';
+  }
+}
+---
+
+<AdminLayout title="Upload Files">
+  {!blobConfigured && (
+    <div class="setup-notice">
+      <h3 class="notice-title">Vercel Blob not configured</h3>
+      <p>To enable file uploads, add <code>BLOB_READ_WRITE_TOKEN</code> to your Vercel environment variables:</p>
+      <ol>
+        <li>Go to <strong>Vercel Dashboard → Storage → Create Store → Blob</strong></li>
+        <li>Copy the <strong>Read/Write Token</strong></li>
+        <li>Add it as <code>BLOB_READ_WRITE_TOKEN</code> in <strong>Settings → Environment Variables</strong></li>
+        <li>Redeploy the project</li>
+      </ol>
+    </div>
+  )}
+
+  {uploadedUrl && (
+    <div class="success-box">
+      <div class="success-title">Uploaded successfully</div>
+      <div class="success-url">{uploadedUrl}</div>
+      <button class="copy-btn" data-url={uploadedUrl}>Copy URL</button>
+      <p class="success-hint">
+        Paste this URL into your article's <code>cover</code> field in the MDX frontmatter.
+      </p>
+    </div>
+  )}
+
+  {uploadError && (
+    <div class="error-box">{uploadError}</div>
+  )}
+
+  <div class="upload-sections">
+    <!-- Article cover image -->
+    <div class="upload-card">
+      <h3 class="upload-title">Article cover image</h3>
+      <p class="upload-desc">Recommended: 1200×630px JPG or WebP · max 4MB</p>
+      <form method="POST" enctype="multipart/form-data" class="upload-form">
+        <input type="hidden" name="folder" value="images/articles" />
+        <label class="file-drop" id="drop-cover">
+          <span class="drop-icon">↑</span>
+          <span class="drop-text">Click to choose or drag a file here</span>
+          <input
+            type="file"
+            name="file"
+            accept="image/*"
+            class="file-input"
+            onchange="this.closest('label').querySelector('.drop-text').textContent = this.files[0]?.name ?? 'No file chosen'"
+          />
+        </label>
+        <button type="submit" class="upload-btn" disabled={!blobConfigured}>Upload cover</button>
+      </form>
+    </div>
+
+    <!-- Favicon -->
+    <div class="upload-card">
+      <h3 class="upload-title">Favicon</h3>
+      <p class="upload-desc">SVG preferred · also accepts ICO, PNG 32×32</p>
+      <form method="POST" enctype="multipart/form-data" class="upload-form">
+        <input type="hidden" name="folder" value="images/favicon" />
+        <label class="file-drop">
+          <span class="drop-icon">↑</span>
+          <span class="drop-text">Click to choose or drag a file here</span>
+          <input
+            type="file"
+            name="file"
+            accept=".svg,.ico,.png"
+            class="file-input"
+            onchange="this.closest('label').querySelector('.drop-text').textContent = this.files[0]?.name ?? 'No file chosen'"
+          />
+        </label>
+        <button type="submit" class="upload-btn" disabled={!blobConfigured}>Upload favicon</button>
+      </form>
+    </div>
+
+    <!-- OG image -->
+    <div class="upload-card">
+      <h3 class="upload-title">OG / social image</h3>
+      <p class="upload-desc">1200×630px JPG or PNG · used as the default social preview</p>
+      <form method="POST" enctype="multipart/form-data" class="upload-form">
+        <input type="hidden" name="folder" value="images/og" />
+        <label class="file-drop">
+          <span class="drop-icon">↑</span>
+          <span class="drop-text">Click to choose or drag a file here</span>
+          <input
+            type="file"
+            name="file"
+            accept="image/*"
+            class="file-input"
+            onchange="this.closest('label').querySelector('.drop-text').textContent = this.files[0]?.name ?? 'No file chosen'"
+          />
+        </label>
+        <button type="submit" class="upload-btn" disabled={!blobConfigured}>Upload OG image</button>
+      </form>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  document.querySelector('.copy-btn')?.addEventListener('click', (e) => {
+    const url = (e.currentTarget as HTMLElement).dataset.url ?? '';
+    navigator.clipboard.writeText(url);
+    (e.currentTarget as HTMLElement).textContent = 'Copied!';
+    setTimeout(() => { (e.currentTarget as HTMLElement).textContent = 'Copy URL'; }, 2000);
+  });
+</script>
+
+<style>
+  .setup-notice {
+    background: #1a1200;
+    border: 1px solid #3d2e00;
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    color: #fbbf24;
+    font-size: 0.82rem;
+    line-height: 1.7;
+  }
+
+  .notice-title { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.625rem; }
+
+  .setup-notice ol {
+    padding-left: 1.25rem;
+    margin-top: 0.625rem;
+  }
+
+  .setup-notice li { margin-bottom: 4px; }
+
+  code {
+    background: #2d2200;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.82em;
+  }
+
+  .success-box {
+    background: #0a1f15;
+    border: 1px solid #064e3b;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .success-title { font-size: 0.82rem; color: #34d399; margin-bottom: 8px; }
+
+  .success-url {
+    font-family: monospace;
+    font-size: 0.78rem;
+    color: #6ee7b7;
+    word-break: break-all;
+    background: #052e16;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+
+  .copy-btn {
+    background: #065f46;
+    border: none;
+    border-radius: 5px;
+    color: #a7f3d0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.78rem;
+    padding: 5px 14px;
+    margin-bottom: 10px;
+    transition: background 0.15s;
+  }
+  .copy-btn:hover { background: #047857; }
+
+  .success-hint { font-size: 0.75rem; color: #4b5563; }
+
+  .error-box {
+    background: #1f0a0a;
+    border: 1px solid #7f1d1d;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    color: #f87171;
+    font-size: 0.82rem;
+    margin-bottom: 2rem;
+  }
+
+  .upload-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .upload-card {
+    background: #1a1a1a;
+    border: 1px solid #2d2d2d;
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+
+  .upload-title { font-size: 0.875rem; font-weight: 500; color: #d1d5db; margin-bottom: 4px; }
+  .upload-desc { font-size: 0.75rem; color: #4b5563; margin-bottom: 1rem; }
+
+  .upload-form { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .file-drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    border: 1px dashed #3d3d3d;
+    border-radius: 6px;
+    padding: 1.5rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: center;
+  }
+  .file-drop:hover { border-color: #6b7280; background: #141414; }
+
+  .drop-icon { font-size: 1.25rem; color: #4b5563; }
+  .drop-text { font-size: 0.75rem; color: #4b5563; }
+  .file-input { display: none; }
+
+  .upload-btn {
+    background: #f9fafb;
+    border: none;
+    border-radius: 6px;
+    color: #0f0f0f;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.55rem;
+    transition: opacity 0.15s;
+  }
+  .upload-btn:hover:not(:disabled) { opacity: 0.85; }
+  .upload-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+</style>

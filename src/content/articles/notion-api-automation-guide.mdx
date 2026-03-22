@@ -1,0 +1,117 @@
+---
+title: "Using the Notion API with n8n to build an operational dashboard"
+description: "How I connected Notion to live operational data using n8n and the Notion API — replacing a manually updated spreadsheet with an always-current dashboard."
+publishedDate: "2026-02-15"
+category: "Automation"
+tags: ["Notion", "n8n", "API", "Dashboard", "Workflow"]
+cover: "/images/articles/notion-api-n8n.jpg"
+readTime: "7 min"
+toc: true
+featured: false
+keywords: ["Notion API n8n", "Notion automation Malaysia", "n8n Notion integration", "Notion dashboard automation", "operational dashboard no-code"]
+---
+
+Our operations team lived in Notion. Our data lived in MySQL. Neither talked to the other, so someone spent an hour every morning copying numbers from one into the other.
+
+That's the kind of problem the Notion API was made to solve.
+
+## What we built
+
+A live operational dashboard in Notion that updates automatically every morning and on demand:
+
+- Daily active users pulled from the database
+- Affiliate performance metrics per region
+- Pending tasks flagged from the ops queue
+- Lead conversion rate for the past 7 days
+
+No manual updates. The workflow runs at 7:30am and the team opens Notion to a current view.
+
+## Setting up the Notion API
+
+First, create an integration at [notion.so/my-integrations](https://www.notion.so/my-integrations):
+
+1. Click **New integration**
+2. Name it (e.g. "n8n Ops Sync")
+3. Select your workspace
+4. Copy the **Internal Integration Token**
+
+Then share your target Notion database with the integration:
+- Open the database in Notion
+- Click **...** → **Connections** → select your integration
+
+## Connecting Notion to n8n
+
+In n8n, add a **Notion** node and authenticate with your token. The node supports:
+
+- **Get Database Items** — read all records
+- **Create Page** — add a new row
+- **Update Page** — modify an existing record
+
+For a dashboard, you'll mostly use **Update Page** to write fresh values into existing property fields.
+
+## The n8n workflow structure
+
+Here's the flow we use:
+
+```
+Schedule Trigger (7:30am)
+  → MySQL: Run aggregate queries
+  → Function: Transform and shape data
+  → Notion: Update dashboard page properties
+  → Telegram: Notify team that dashboard is updated
+```
+
+The MySQL query node runs four queries in parallel using n8n's split execution, then a Function node merges the results:
+
+```javascript
+// Merge parallel query results into one object
+const dau = $('MySQL - DAU').first().json;
+const affiliates = $('MySQL - Affiliates').first().json;
+const leads = $('MySQL - Leads').first().json;
+
+return [{
+  json: {
+    dailyActiveUsers: dau.count,
+    affiliateRevenue: affiliates.total_revenue,
+    leadConversionRate: ((leads.converted / leads.total) * 100).toFixed(1) + '%',
+    updatedAt: new Date().toISOString(),
+  }
+}];
+```
+
+## Updating Notion page properties via API
+
+The Notion node in n8n exposes all your database properties. Map each field:
+
+| Notion Property | Type | Value |
+|---|---|---|
+| DAU | Number | `{{ $json.dailyActiveUsers }}` |
+| Revenue | Number | `{{ $json.affiliateRevenue }}` |
+| Conversion Rate | Rich Text | `{{ $json.leadConversionRate }}` |
+| Last Updated | Date | `{{ $json.updatedAt }}` |
+
+The key thing to get right is matching Notion's property types. A "Number" property only accepts numeric values — passing a string with a `%` sign will fail silently.
+
+## Adding an on-demand trigger
+
+The scheduled trigger handles the morning refresh. For on-demand updates, I added a Telegram bot command:
+
+1. Add a **Telegram Trigger** node listening for `/update_dashboard`
+2. Wire it to the same MySQL → Function → Notion chain
+3. Add a Telegram reply node at the end: "Dashboard updated."
+
+Any team member can now trigger a refresh from their phone mid-day without touching n8n directly.
+
+## What this replaced
+
+The manual process was: open MySQL Workbench → run queries → copy numbers → open Notion → paste into the right fields → update the timestamp. About 45–60 minutes across the morning.
+
+Now it's zero. The team gets a Telegram ping at 7:31am and the dashboard is ready.
+
+## Gotchas to watch for
+
+**Rate limits** — Notion API allows 3 requests per second. If you're updating many pages, add a Wait node between Notion calls.
+
+**Property name case sensitivity** — `"Daily Active Users"` and `"daily active users"` are treated as different properties. Match exactly.
+
+**Database ID vs Page ID** — when targeting a database page for update, use the page ID (the row), not the database ID. Easy to mix up in the n8n UI.

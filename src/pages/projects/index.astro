@@ -1,0 +1,218 @@
+---
+// src/pages/projects/index.astro
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allProjects = await getCollection('projects');
+const projects = allProjects.sort((a, b) => b.data.year - a.data.year);
+---
+
+<BaseLayout title="Projects" description="Automation systems, internal tools, and workflow projects.">
+  <section class="container page">
+    <header class="page-header">
+      <h1>Projects</h1>
+      <p class="page-sub">Automation systems, internal tools, and workflow projects.</p>
+    </header>
+
+    {projects.length === 0 ? (
+      <p class="empty">No projects yet — check back soon.</p>
+    ) : (
+      <ul class="project-grid">
+        {projects.map(project => (
+          <li class="project-card">
+            <div class="project-top">
+              <div class="project-meta">
+                <span class="project-cat">{project.data.category}</span>
+                <span class="project-year">{project.data.year}</span>
+              </div>
+              <span class:list={['project-status', project.data.status === 'Live' ? 'status-live' : 'status-other']}>
+                {project.data.status}
+              </span>
+            </div>
+            <h2 class="project-title">{project.data.title}</h2>
+            <p class="project-desc">{project.data.description}</p>
+            {project.data.metrics && (
+              <div class="project-metrics">
+                {project.data.metrics.map(m => (
+                  <div class="metric">
+                    <span class="metric-value">{m.value}</span>
+                    <span class="metric-label">{m.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div class="project-tags">
+              {project.data.tags.slice(0, 4).map(tag => (
+                <span class="tag">{tag}</span>
+              ))}
+            </div>
+            {(project.data.links?.github || project.data.links?.demo) && (
+              <div class="project-links">
+                {project.data.links.github && (
+                  <a href={project.data.links.github} target="_blank" rel="noopener noreferrer" class="project-link">GitHub →</a>
+                )}
+                {project.data.links.demo && (
+                  <a href={project.data.links.demo} target="_blank" rel="noopener noreferrer" class="project-link">Live demo →</a>
+                )}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding: 4rem 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 0.5px solid var(--color-border);
+  }
+
+  .page-header h1 {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .page-sub {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+  }
+
+  .empty {
+    color: var(--color-text-faint);
+    font-size: 0.9rem;
+  }
+
+  .project-grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .project-card {
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: border-color 0.15s;
+  }
+
+  .project-card:hover {
+    border-color: var(--color-border-strong);
+  }
+
+  .project-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .project-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .project-cat {
+    font-size: 0.7rem;
+    padding: 3px 9px;
+    border-radius: 4px;
+    background: #EEF2FF;
+    color: #3730A3;
+  }
+
+  .project-status {
+    font-size: 0.7rem;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+
+  .status-live {
+    background: #E1F5EE;
+    color: #0F6E56;
+  }
+
+  .status-other {
+    background: var(--color-bg-soft);
+    color: var(--color-text-muted);
+  }
+
+  .project-title {
+    font-size: 1.05rem;
+    color: var(--color-text);
+  }
+
+  .project-desc {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+  }
+
+  .project-metrics {
+    display: flex;
+    gap: 1.25rem;
+    padding: 0.875rem 0;
+    border-top: 0.5px solid var(--color-border);
+    border-bottom: 0.5px solid var(--color-border);
+  }
+
+  .metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .metric-value {
+    font-size: 1rem;
+    font-weight: 500;
+    font-family: var(--font-heading);
+    color: var(--color-text);
+  }
+
+  .metric-label {
+    font-size: 0.7rem;
+    color: var(--color-text-faint);
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .tag {
+    font-size: 0.7rem;
+    padding: 3px 9px;
+    border: 0.5px solid var(--color-border);
+    border-radius: 20px;
+    color: var(--color-text-muted);
+  }
+
+  .project-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+  }
+
+  .project-link {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    transition: color 0.15s;
+  }
+
+  .project-link:hover {
+    color: var(--color-text);
+  }
+</style>

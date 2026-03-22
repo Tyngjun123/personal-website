@@ -1,0 +1,11 @@
+# robots.txt
+# Controls which pages search engines can crawl
+
+User-agent: *
+Allow: /
+
+# Block draft pages (if any get accidentally built)
+Disallow: /drafts/
+
+# Sitemap location — Google & Bing read this
+Sitemap: https://yourdomain.com/sitemap-index.xml

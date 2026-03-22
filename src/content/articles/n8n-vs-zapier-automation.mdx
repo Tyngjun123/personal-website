@@ -1,0 +1,78 @@
+---
+title: "n8n vs Zapier: Why I switched and never looked back"
+description: "A practical comparison for operators who actually build automations — cost, flexibility, self-hosting, and where each tool genuinely wins."
+publishedDate: "2026-03-10"
+category: "Automation"
+tags: ["n8n", "Zapier", "Workflow Automation", "No-Code", "Self-Hosted"]
+cover: "/images/articles/n8n-vs-zapier.jpg"
+readTime: "5 min"
+toc: true
+featured: false
+keywords: ["n8n vs zapier", "n8n self hosted Malaysia", "best automation tool 2026", "zapier alternative free", "n8n review"]
+---
+
+I used Zapier for two years. It was fine — until the bill arrived.
+
+At around 50,000 tasks per month, Zapier costs roughly $100–150/month. n8n on a $6 VPS? Zero per task. That's when I started looking seriously at alternatives.
+
+## The real cost comparison
+
+Most comparisons stop at pricing tiers. That misses the point. The actual cost is:
+
+- **Zapier**: Pay per task, per Zap, per user. Costs compound fast in operations.
+- **n8n cloud**: Cheaper than Zapier, still per-execution pricing.
+- **n8n self-hosted**: One VPS, unlimited executions. Fixed cost.
+
+For a team running 30–80 automations across lead management, reporting, and ops, self-hosted n8n is the obvious choice.
+
+## Where Zapier still wins
+
+I'll be honest — Zapier isn't bad. It wins in specific scenarios:
+
+1. **Non-technical users** who need to build automations without any setup
+2. **App coverage** — Zapier has 6,000+ integrations vs n8n's ~400
+3. **Speed to first workflow** — Zapier is genuinely faster to get started
+
+If you're a solo founder who needs to connect two SaaS tools in 10 minutes, Zapier is probably right for you.
+
+## Where n8n wins (for operators)
+
+Once you're building serious automations, n8n pulls ahead on every dimension that matters:
+
+**Code when you need it**
+
+```javascript
+// n8n Function node — run any JS directly in the workflow
+const leads = $input.all();
+return leads.filter(lead => {
+  const score = lead.json.pageViews * 2 + lead.json.formFills * 10;
+  return score > 25;
+});
+```
+
+Zapier has no equivalent. You're locked into their logic blocks.
+
+**Error handling that makes sense**
+
+n8n lets you wire up error workflows — so when a node fails, a separate flow fires automatically. You can send yourself a Telegram alert, log the failure to a database, and retry — all without touching the main workflow.
+
+**Branching and merging**
+
+Complex workflows in Zapier require multiple Zaps that are hard to maintain. In n8n, one workflow can branch into parallel paths, merge back, and continue — all visible in one canvas.
+
+## My migration process
+
+Moving from Zapier wasn't painful. I did it workflow by workflow over two weeks:
+
+1. Identified which Zaps ran most frequently (highest cost)
+2. Rebuilt them in n8n — most took 30–60 minutes
+3. Ran both in parallel for 3 days to verify outputs matched
+4. Disabled the Zap
+
+The only workflows I kept in Zapier were ones that used integrations n8n doesn't support yet.
+
+## What I'd tell someone starting today
+
+If you're building automations for a business — not just connecting two apps — start with n8n. The learning curve is real but short. The flexibility you gain is permanent.
+
+Self-host it on a $6 DigitalOcean or Hetzner VPS. Use Caddy as a reverse proxy. The whole setup takes about 2 hours and you never think about cost again.

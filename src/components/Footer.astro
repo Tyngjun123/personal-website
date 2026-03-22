@@ -1,0 +1,49 @@
+---
+// src/components/Footer.astro
+import { SITE } from '../config/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer-wrapper">
+  <div class="container footer">
+    <p class="footer-copy">&copy; {year} {SITE.author}</p>
+    <div class="footer-links">
+      {SITE.social.github && (
+        <a href={SITE.social.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+      )}
+      {SITE.social.linkedin && (
+        <a href={SITE.social.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      )}
+      {SITE.social.twitter && (
+        <a href={SITE.social.twitter} target="_blank" rel="noopener noreferrer">Twitter</a>
+      )}
+      <a href="/rss.xml">RSS</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer-wrapper {
+    border-top: 0.5px solid var(--color-border);
+    margin-top: 6rem;
+  }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .footer-links a:hover {
+    color: var(--color-text);
+  }
+</style>

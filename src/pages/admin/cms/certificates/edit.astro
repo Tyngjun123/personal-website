@@ -1,0 +1,119 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { isConfigured, getFile, saveFile, slugify } from '../../../../lib/github';
+
+const configured = isConfigured();
+const CERTS_PATH = 'src/content/certificates';
+const idParam = Astro.url.searchParams.get('id') ?? '';
+const isEdit = !!idParam;
+
+let fields: Record<string, any> = {
+  name: '', issuer: '', issuerShort: '', category: 'Automation',
+  color: 'teal', issuedDate: '', expiryDate: '', credentialUrl: '', featured: false,
+};
+let sha = '';
+let errorMsg = '';
+let successMsg = '';
+
+if (isEdit && configured) {
+  try {
+    const file = await getFile(`${CERTS_PATH}/${idParam}.json`);
+    sha = file.sha;
+    fields = { ...fields, ...JSON.parse(file.content) };
+  } catch (e: any) { errorMsg = `Could not load certificate: ${e.message}`; }
+}
+
+if (Astro.request.method === 'POST' && configured) {
+  try {
+    const form = await Astro.request.formData();
+    const g = (k: string) => form.get(k)?.toString().trim() ?? '';
+    const name = g('name');
+    const id = isEdit ? idParam : slugify(name);
+
+    const data: Record<string, any> = {
+      name, issuer: g('issuer'), issuerShort: g('issuerShort'),
+      category: g('category'), color: g('color'),
+      issuedDate: g('issuedDate'),
+      expiryDate: g('expiryDate') || undefined,
+      credentialUrl: g('credentialUrl') || undefined,
+      featured: form.get('featured') === 'on',
+    };
+    // Remove undefined fields
+    Object.keys(data).forEach(k => data[k] === undefined && delete data[k]);
+
+    const filePath = `${CERTS_PATH}/${id}.json`;
+    await saveFile(filePath, JSON.stringify(data, null, 2), isEdit ? sha : undefined, `CMS: ${isEdit ? 'update' : 'create'} certificate ${id}`);
+    successMsg = `Certificate "${name}" ${isEdit ? 'updated' : 'created'}. Rebuilding…`;
+    if (!isEdit) return Astro.redirect(`/admin/cms/certificates/edit?id=${id}&saved=1`);
+    try { const f = await getFile(filePath); sha = f.sha; } catch {}
+  } catch (e: any) { errorMsg = e.message; }
+}
+
+if (Astro.url.searchParams.get('saved')) successMsg = 'Certificate saved. Rebuilding…';
+
+const COLORS = ['teal','blue','amber','purple','coral','gray'];
+---
+
+<AdminLayout title={isEdit ? `Edit: ${fields.name || idParam}` : 'New certificate'}>
+  <div class="edit-header">
+    <a href="/admin/cms/certificates" class="back-link">← All certificates</a>
+  </div>
+
+  {!configured && <div class="notice">GitHub not configured.</div>}
+  {successMsg && <div class="alert alert-ok">{successMsg}</div>}
+  {errorMsg   && <div class="alert alert-err">{errorMsg}</div>}
+
+  <form method="POST" class="cms-form">
+    <div class="form-card">
+      <div class="fields">
+        <div class="field full"><label>Certificate name</label><input name="name" value={fields.name} required placeholder="AWS Certified Solutions Architect" /></div>
+        <div class="field half"><label>Issuing organization</label><input name="issuer" value={fields.issuer} placeholder="Amazon Web Services" /></div>
+        <div class="field half"><label>Short name <span class="hint">(for badge)</span></label><input name="issuerShort" value={fields.issuerShort} placeholder="AWS" /></div>
+        <div class="field half"><label>Category</label><input name="category" value={fields.category} placeholder="Cloud" /></div>
+        <div class="field half">
+          <label>Badge color</label>
+          <select name="color">
+            {COLORS.map(c => <option value={c} selected={fields.color === c}>{c}</option>)}
+          </select>
+        </div>
+        <div class="field half"><label>Issued date <span class="hint">YYYY-MM</span></label><input name="issuedDate" value={fields.issuedDate} placeholder="2025-06" /></div>
+        <div class="field half"><label>Expiry date <span class="hint">optional</span></label><input name="expiryDate" value={fields.expiryDate ?? ''} placeholder="2028-06" /></div>
+        <div class="field full"><label>Credential URL <span class="hint">optional verify link</span></label><input name="credentialUrl" value={fields.credentialUrl ?? ''} placeholder="https://www.credly.com/badges/..." /></div>
+        <div class="field full">
+          <label class="check-label"><input type="checkbox" name="featured" checked={fields.featured} /> Featured on certificates page</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-save" disabled={!configured}>{isEdit ? 'Save changes' : 'Add certificate'}</button>
+    </div>
+  </form>
+</AdminLayout>
+
+<style>
+  .edit-header{display:flex;margin-bottom:1.25rem;}
+  .back-link{font-size:.8rem;color:#4b5563;transition:color .15s;}
+  .back-link:hover{color:#9ca3af;}
+  .notice{background:#1a1200;border:1px solid #3d2e00;color:#fbbf24;padding:.875rem 1rem;border-radius:8px;margin-bottom:1.25rem;font-size:.82rem;}
+  .alert{padding:.75rem 1rem;border-radius:6px;font-size:.82rem;margin-bottom:1.25rem;}
+  .alert-ok{background:#0a1f15;border:1px solid #064e3b;color:#34d399;}
+  .alert-err{background:#1f0a0a;border:1px solid #7f1d1d;color:#f87171;}
+  .cms-form{display:flex;flex-direction:column;gap:1.5rem;}
+  .form-card{background:#1a1a1a;border:1px solid #2d2d2d;border-radius:8px;padding:1.5rem;}
+  .fields{display:flex;flex-wrap:wrap;gap:1rem;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field.full{flex:1 1 100%;}
+  .field.half{flex:1 1 calc(50% - .5rem);min-width:180px;}
+  label{font-size:.75rem;color:#6b7280;}
+  .hint{color:#374151;font-size:.7rem;}
+  input,select{background:#111;border:1px solid #2d2d2d;border-radius:6px;color:#e5e7eb;font-family:inherit;font-size:.85rem;padding:.5rem .75rem;outline:none;transition:border-color .15s;width:100%;}
+  input:focus,select:focus{border-color:#4b5563;}
+  .check-label{display:flex;align-items:center;gap:8px;font-size:.82rem;color:#6b7280;cursor:pointer;}
+  .check-label input{width:auto;padding:0;}
+  .form-actions{display:flex;justify-content:flex-end;}
+  .btn-save{background:#f9fafb;border:none;border-radius:6px;color:#0f0f0f;cursor:pointer;font-family:inherit;font-size:.85rem;font-weight:500;padding:.6rem 1.5rem;transition:opacity .15s;}
+  .btn-save:hover:not(:disabled){opacity:.85;}
+  .btn-save:disabled{opacity:.3;cursor:not-allowed;}
+</style>

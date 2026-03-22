@@ -1,0 +1,188 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { isConfigured, getFile, saveFile } from '../../../lib/github';
+
+const configured = isConfigured();
+let successMsg = '';
+let errorMsg = '';
+let settings: any = {};
+
+const SETTINGS_PATH = 'src/data/cms-settings.json';
+
+// Load current settings
+if (configured) {
+  try {
+    const file = await getFile(SETTINGS_PATH);
+    settings = JSON.parse(file.content);
+  } catch (e: any) {
+    errorMsg = `Could not load settings: ${e.message}`;
+  }
+}
+
+if (Astro.request.method === 'POST' && configured) {
+  try {
+    const form = await Astro.request.formData();
+    const g = (k: string) => form.get(k)?.toString().trim() ?? '';
+
+    const file = await getFile(SETTINGS_PATH);
+    const current = JSON.parse(file.content);
+
+    const updated = {
+      ...current,
+      name:        g('name'),
+      title:       g('title'),
+      description: g('description'),
+      url:         g('url'),
+      author:      g('author'),
+      authorRole:  g('authorRole'),
+      authorBio:   g('authorBio'),
+      location:    g('location'),
+      email:       g('email'),
+      twitterHandle: g('twitterHandle'),
+      social: {
+        github:    g('github'),
+        linkedin:  g('linkedin'),
+        twitter:   g('twitter'),
+        facebook:  g('facebook'),
+        instagram: g('instagram'),
+        youtube:   g('youtube'),
+      },
+    };
+
+    await saveFile(SETTINGS_PATH, JSON.stringify(updated, null, 2), file.sha, 'CMS: update site settings');
+    settings = updated;
+    successMsg = 'Settings saved. Vercel will rebuild in ~1–2 minutes.';
+  } catch (e: any) {
+    errorMsg = e.message;
+  }
+}
+
+const s = settings;
+---
+
+<AdminLayout title="Home & Social Settings">
+  {!configured && (
+    <div class="notice">
+      <strong>GitHub not configured.</strong> Add <code>GITHUB_TOKEN</code>, <code>GITHUB_OWNER</code>, and <code>GITHUB_REPO</code> to your Vercel environment variables, then redeploy.
+    </div>
+  )}
+
+  {successMsg && <div class="alert alert-ok">{successMsg}</div>}
+  {errorMsg   && <div class="alert alert-err">{errorMsg}</div>}
+
+  <form method="POST" class="cms-form">
+    <section class="form-section">
+      <h2 class="form-section-title">Homepage content</h2>
+      <div class="fields">
+        <div class="field">
+          <label>Display name</label>
+          <input name="name" value={s.name ?? ''} placeholder="TJ" />
+        </div>
+        <div class="field">
+          <label>Page title <span class="hint">(shown in browser tab + Google)</span></label>
+          <input name="title" value={s.title ?? ''} placeholder="TJ — Product Owner & Automation Engineer" />
+        </div>
+        <div class="field">
+          <label>Meta description <span class="hint">(120–160 chars ideal)</span></label>
+          <textarea name="description" rows="3">{s.description ?? ''}</textarea>
+        </div>
+        <div class="field">
+          <label>Author name</label>
+          <input name="author" value={s.author ?? ''} />
+        </div>
+        <div class="field">
+          <label>Role / tagline</label>
+          <input name="authorRole" value={s.authorRole ?? ''} placeholder="Product Owner · Automation Engineer" />
+        </div>
+        <div class="field">
+          <label>Bio</label>
+          <textarea name="authorBio" rows="3">{s.authorBio ?? ''}</textarea>
+        </div>
+        <div class="field half">
+          <label>Location</label>
+          <input name="location" value={s.location ?? ''} placeholder="Malaysia" />
+        </div>
+        <div class="field half">
+          <label>Email</label>
+          <input name="email" type="email" value={s.email ?? ''} />
+        </div>
+        <div class="field half">
+          <label>Site URL</label>
+          <input name="url" value={s.url ?? ''} placeholder="https://yourdomain.com" />
+        </div>
+        <div class="field half">
+          <label>Twitter handle</label>
+          <input name="twitterHandle" value={s.twitterHandle ?? ''} placeholder="@yourhandle" />
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2 class="form-section-title">Social links</h2>
+      <div class="fields">
+        {[
+          { name: 'github',    label: 'GitHub',    placeholder: 'https://github.com/yourhandle' },
+          { name: 'linkedin',  label: 'LinkedIn',  placeholder: 'https://linkedin.com/in/yourhandle' },
+          { name: 'twitter',   label: 'Twitter/X', placeholder: 'https://twitter.com/yourhandle' },
+          { name: 'facebook',  label: 'Facebook',  placeholder: 'https://facebook.com/yourpage' },
+          { name: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/yourhandle' },
+          { name: 'youtube',   label: 'YouTube',   placeholder: 'https://youtube.com/@yourchannel' },
+        ].map(f => (
+          <div class="field half">
+            <label>{f.label}</label>
+            <input name={f.name} value={s.social?.[f.name] ?? ''} placeholder={f.placeholder} />
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-save" disabled={!configured}>Save & deploy</button>
+    </div>
+  </form>
+</AdminLayout>
+
+<style>
+  .notice {
+    background: #1a1200; border: 1px solid #3d2e00; color: #fbbf24;
+    padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.82rem; line-height: 1.7;
+  }
+  code { background: #2d2200; padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: 0.82em; }
+
+  .alert { padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.82rem; margin-bottom: 1.25rem; }
+  .alert-ok  { background: #0a1f15; border: 1px solid #064e3b; color: #34d399; }
+  .alert-err { background: #1f0a0a; border: 1px solid #7f1d1d; color: #f87171; }
+
+  .cms-form { display: flex; flex-direction: column; gap: 2rem; }
+
+  .form-section {
+    background: #1a1a1a; border: 1px solid #2d2d2d; border-radius: 8px; padding: 1.5rem;
+  }
+  .form-section-title { font-size: 0.82rem; font-weight: 500; color: #9ca3af; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .fields { display: flex; flex-wrap: wrap; gap: 1rem; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 100%; }
+  .field.half { flex: 1 1 calc(50% - 0.5rem); min-width: 200px; }
+
+  label { font-size: 0.78rem; color: #6b7280; }
+  .hint { color: #374151; font-size: 0.72rem; }
+
+  input, textarea {
+    background: #111; border: 1px solid #2d2d2d; border-radius: 6px;
+    color: #e5e7eb; font-family: inherit; font-size: 0.85rem;
+    padding: 0.55rem 0.875rem; outline: none; transition: border-color 0.15s; width: 100%;
+  }
+  textarea { resize: vertical; line-height: 1.6; }
+  input:focus, textarea:focus { border-color: #4b5563; }
+
+  .form-actions { display: flex; justify-content: flex-end; }
+  .btn-save {
+    background: #f9fafb; border: none; border-radius: 6px; color: #0f0f0f;
+    cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 500;
+    padding: 0.6rem 1.5rem; transition: opacity 0.15s;
+  }
+  .btn-save:hover:not(:disabled) { opacity: 0.85; }
+  .btn-save:disabled { opacity: 0.3; cursor: not-allowed; }
+</style>

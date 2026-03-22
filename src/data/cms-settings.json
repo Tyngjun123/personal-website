@@ -1,0 +1,23 @@
+{
+  "name": "TJ",
+  "title": "TJ — Product Owner & Automation Engineer",
+  "description": "Product Owner based in Malaysia, sharing automation projects, certifications, and practical guides on n8n, APIs, and workflow tools.",
+  "url": "https://yourdomain.com",
+  "author": "TJ",
+  "authorRole": "Product Owner · Automation Engineer",
+  "authorBio": "Building automation systems for iGaming operations. Writing about n8n, APIs, and practical tools that actually get used.",
+  "location": "Malaysia",
+  "email": "hello@yourdomain.com",
+  "locale": "en_MY",
+  "themeColor": "#ffffff",
+  "twitterHandle": "@yourhandle",
+  "ogImage": "/images/og-default.jpg",
+  "social": {
+    "github": "https://github.com/yourhandle",
+    "linkedin": "https://linkedin.com/in/yourhandle",
+    "twitter": "https://twitter.com/yourhandle",
+    "facebook": "",
+    "instagram": "",
+    "youtube": ""
+  }
+}

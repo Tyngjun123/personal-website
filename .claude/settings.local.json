@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(vercel --version)",
+      "Bash(npm run:*)",
+      "Bash(node -e \"console.log\\(require\\(''./node_modules/@astrojs/sitemap/package.json''\\).version\\)\")",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(vercel --yes)",
+      "Bash(npm install:*)",
+      "Bash(vercel deploy:*)",
+      "Bash(node -e \"require\\(''fs''\\).writeFileSync\\(''.vercel/output/functions/_render.func/.vc-config.json'', JSON.stringify\\({runtime:''nodejs20.x'',handler:''.vercel/output/_functions/entry.mjs'',launcherType:''Nodejs'',supportsResponseStreaming:true}\\)\\)\")",
+      "Bash(vercel --prod --prebuilt --yes)"
+    ]
+  }
+}

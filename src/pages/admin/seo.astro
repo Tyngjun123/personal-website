@@ -1,0 +1,207 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getCollection } from 'astro:content';
+import { scoreArticle, scoreBadge } from '../../lib/seoScore';
+
+const articles = await getCollection('articles');
+const sorted = [...articles].sort(
+  (a, b) => new Date(b.data.publishedDate).getTime() - new Date(a.data.publishedDate).getTime()
+);
+
+const results = sorted.map(a => ({
+  article: a,
+  result: scoreArticle(a.data),
+}));
+---
+
+<AdminLayout title="SEO Monitor">
+  <div class="legend">
+    <span class="dot good"></span> Good (80–100)
+    <span class="dot okay"></span> Okay (50–79)
+    <span class="dot bad"></span> Needs work (0–49)
+  </div>
+
+  <div class="seo-list">
+    {results.map(({ article, result }) => {
+      const badge = scoreBadge(result.score);
+      const d = article.data;
+      return (
+        <div class="seo-card">
+          <div class="seo-card-header">
+            <div class="seo-title-row">
+              <a href={`/articles/${article.slug}`} target="_blank" class="seo-title">{d.title}</a>
+              <span class="seo-score" style={`background:${badge.bg}; color:${badge.color}`}>
+                {result.score}/100 · {badge.label}
+              </span>
+            </div>
+            <div class="seo-meta">
+              {d.category} · {d.publishedDate} · {d.tags.length} tag{d.tags.length !== 1 ? 's' : ''}
+            </div>
+          </div>
+
+          <div class="checks">
+            {result.breakdown.map(b => (
+              <div class:list={['check', b.ok ? 'check-ok' : 'check-fail']}>
+                <span class="check-icon">{b.ok ? '✓' : '✗'}</span>
+                <span class="check-field">{b.field}</span>
+                <span class="check-pts">{b.points}/{b.max}</span>
+              </div>
+            ))}
+          </div>
+
+          {result.issues.length > 0 && (
+            <ul class="issues">
+              {result.issues.map(issue => (
+                <li class="issue">{issue}</li>
+              ))}
+            </ul>
+          )}
+
+          <div class="field-preview">
+            <div class="preview-row">
+              <span class="preview-label">Title</span>
+              <span class:list={['preview-count', d.title.length > 60 || d.title.length < 30 ? 'count-warn' : 'count-ok']}>
+                {d.title.length} chars
+              </span>
+            </div>
+            <div class="preview-row">
+              <span class="preview-label">Description</span>
+              <span class:list={['preview-count', d.description.length > 160 || d.description.length < 120 ? 'count-warn' : 'count-ok']}>
+                {d.description.length} chars
+              </span>
+            </div>
+            <div class="preview-row">
+              <span class="preview-label">Keywords</span>
+              <span class="preview-val">{d.keywords?.join(', ') ?? '—'}</span>
+            </div>
+            <div class="preview-row">
+              <span class="preview-label">Cover</span>
+              <span class:list={['preview-val', !d.cover ? 'val-missing' : '']}>{d.cover ?? 'Not set'}</span>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</AdminLayout>
+
+<style>
+  .legend {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+  }
+
+  .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .dot.good { background: #0F6E56; }
+  .dot.okay { background: #92400E; }
+  .dot.bad  { background: #991B1B; }
+
+  .seo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .seo-card {
+    background: #1a1a1a;
+    border: 1px solid #2d2d2d;
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+
+  .seo-card-header { margin-bottom: 1rem; }
+
+  .seo-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+
+  .seo-title {
+    font-size: 0.9rem;
+    color: #d1d5db;
+    font-weight: 500;
+    transition: color 0.15s;
+  }
+  .seo-title:hover { color: #f9fafb; }
+
+  .seo-score {
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .seo-meta { font-size: 0.75rem; color: #4b5563; }
+
+  .checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 0.875rem;
+  }
+
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+  .check-ok  { background: #0a1f15; color: #34d399; }
+  .check-fail { background: #1f0a0a; color: #f87171; }
+  .check-icon { font-size: 0.65rem; }
+  .check-pts { opacity: 0.6; }
+
+  .issues {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 0.875rem;
+  }
+
+  .issue {
+    font-size: 0.75rem;
+    color: #fbbf24;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .issue::before { content: '→'; position: absolute; left: 0; }
+
+  .field-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 1px solid #2d2d2d;
+    padding-top: 0.875rem;
+  }
+
+  .preview-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 0.75rem;
+  }
+
+  .preview-label { color: #4b5563; min-width: 90px; flex-shrink: 0; }
+  .preview-val { color: #6b7280; word-break: break-all; }
+  .preview-count { font-weight: 500; }
+  .count-ok  { color: #34d399; }
+  .count-warn { color: #f87171; }
+  .val-missing { color: #f87171; }
+</style>

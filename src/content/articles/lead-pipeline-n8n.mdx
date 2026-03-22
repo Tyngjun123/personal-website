@@ -1,0 +1,62 @@
+---
+title: "How I automated my entire lead pipeline with n8n"
+description: "A walkthrough of the end-to-end system — from form submission to multi-channel follow-up — built with zero recurring cost and running reliably for 6 months."
+publishedDate: "2026-03-15"
+category: "Automation"
+tags: ["n8n", "WhatsApp", "MySQL", "Notion", "Lead Management"]
+cover: "https://2bepclgqkohwa7fw.public.blob.vercel-storage.com/images/og/gemini_generated_image_32aul732aul732au.png"
+readTime: "6 min"
+toc: true
+featured: true
+keywords: ["n8n automation Malaysia", "lead management automation", "WhatsApp API n8n"]
+---
+
+When a lead filled out our Google Form, someone had to manually copy the details into a spreadsheet, send a WhatsApp message, and remember to follow up. Things get missed. Leads go cold.
+
+I wanted a system that handled everything automatically — with zero added SaaS cost.
+
+## The problem with manual lead tracking
+
+At 30–50 leads per week, manual copy-pasting burns hours and introduces errors. The team was spending time on admin instead of actual conversations.
+
+## How the n8n pipeline works
+
+The entire flow is triggered by a single webhook. Here's the sequence:
+
+1. Lead submits Google Form → webhook fires into n8n
+2. n8n writes the lead to MySQL and creates a Notion record
+3. WhatsApp message sent via Fonnte within 60 seconds
+4. Team notified via Telegram bot with full lead details
+5. If no reply in 24h, follow-up sequence triggers automatically
+
+## Setting up the webhook trigger
+
+In n8n, add a Webhook node and set it to POST. Copy the production URL and paste it into your Google Form's Apps Script as the submission handler.
+
+```javascript
+function onFormSubmit(e) {
+  const payload = {
+    name: e.values[1],
+    email: e.values[2],
+    phone: e.values[3],
+    timestamp: new Date().toISOString()
+  };
+  UrlFetchApp.fetch("https://your-n8n.domain/webhook/leads", {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(payload)
+  });
+}
+```
+
+## Multi-channel notifications
+
+The two channels I use are WhatsApp (via Fonnte) and Telegram. Both fire in parallel using n8n's split execution — no added latency.
+
+- WhatsApp message is personalised with the lead's name
+- Telegram bot posts a structured summary to the team channel
+- MySQL status field is set to `contacted` immediately after sending
+
+## Results after 6 months
+
+First contact time dropped from ~4 hours to under 60 seconds. Manual follow-up effort is down roughly 80%. The n8n workflow file is available on my GitHub if you want a starting point.

@@ -1,0 +1,180 @@
+---
+// src/pages/certificates/index.astro
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allCerts = await getCollection('certificates');
+const certs = allCerts.sort((a, b) => b.data.issuedDate.localeCompare(a.data.issuedDate));
+
+const colorMap: Record<string, string> = {
+  teal:   { bg: '#E1F5EE', text: '#0F6E56' },
+  blue:   { bg: '#EEF2FF', text: '#3730A3' },
+  amber:  { bg: '#FEF9EE', text: '#92400E' },
+  purple: { bg: '#F5F3FF', text: '#5B21B6' },
+  coral:  { bg: '#FFF1EE', text: '#9A3412' },
+  gray:   { bg: '#F3F4F6', text: '#374151' },
+} as any;
+---
+
+<BaseLayout title="Certificates" description="Certifications in automation, cloud, and product management.">
+  <section class="container page">
+    <header class="page-header">
+      <h1>Certificates</h1>
+      <p class="page-sub">Certifications in automation, cloud, and product management.</p>
+    </header>
+
+    {certs.length === 0 ? (
+      <p class="empty">No certificates yet — check back soon.</p>
+    ) : (
+      <ul class="cert-list">
+        {certs.map(cert => {
+          const color = colorMap[cert.data.color] ?? colorMap.gray;
+          const date = new Date(cert.data.issuedDate + '-01').toLocaleDateString('en-MY', {
+            year: 'numeric', month: 'short',
+          });
+          return (
+            <li class="cert-item">
+              <div class="cert-badge" style={`background:${color.bg}; color:${color.text}`}>
+                {cert.data.issuerShort}
+              </div>
+              <div class="cert-info">
+                <div class="cert-name">{cert.data.name}</div>
+                <div class="cert-meta">
+                  <span>{cert.data.issuer}</span>
+                  <span class="cert-dot"></span>
+                  <span>{date}</span>
+                  {cert.data.expiryDate && (
+                    <>
+                      <span class="cert-dot"></span>
+                      <span>Expires {cert.data.expiryDate}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div class="cert-right">
+                <span class="cert-cat">{cert.data.category}</span>
+                {cert.data.credentialUrl && (
+                  <a href={cert.data.credentialUrl} target="_blank" rel="noopener noreferrer" class="cert-link">
+                    Verify →
+                  </a>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding: 4rem 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 0.5px solid var(--color-border);
+  }
+
+  .page-header h1 {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .page-sub {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+  }
+
+  .empty {
+    color: var(--color-text-faint);
+    font-size: 0.9rem;
+  }
+
+  .cert-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cert-item {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem 0;
+    border-bottom: 0.5px solid var(--color-border);
+  }
+
+  .cert-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+  }
+
+  .cert-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cert-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 4px;
+  }
+
+  .cert-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+  }
+
+  .cert-dot {
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: var(--color-border-strong);
+    flex-shrink: 0;
+  }
+
+  .cert-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .cert-cat {
+    font-size: 0.7rem;
+    padding: 3px 9px;
+    border: 0.5px solid var(--color-border);
+    border-radius: 20px;
+    color: var(--color-text-muted);
+  }
+
+  .cert-link {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    transition: color 0.15s;
+  }
+
+  .cert-link:hover {
+    color: var(--color-text);
+  }
+
+  @media (max-width: 600px) {
+    .cert-item { flex-wrap: wrap; }
+    .cert-right { flex-direction: row; align-items: center; width: 100%; }
+  }
+</style>

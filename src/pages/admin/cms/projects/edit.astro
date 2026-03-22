@@ -1,0 +1,149 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { isConfigured, getFile, saveFile, parseMdx, buildMdx, slugify } from '../../../../lib/github';
+
+const configured = isConfigured();
+const PROJECTS_PATH = 'src/content/projects';
+const slugParam = Astro.url.searchParams.get('slug') ?? '';
+const isEdit = !!slugParam;
+
+let fields: Record<string, any> = {
+  title: '', description: '', summary: '', category: 'Automation',
+  tags: '', year: new Date().getFullYear(), role: 'Product Owner',
+  status: 'Live', type: 'Internal Tool', featured: false,
+  metrics: '', githubLink: '', demoLink: '',
+};
+let body = '';
+let sha = '';
+let errorMsg = '';
+let successMsg = '';
+
+if (isEdit && configured) {
+  try {
+    const file = await getFile(`${PROJECTS_PATH}/${slugParam}.mdx`);
+    sha = file.sha;
+    const { data, body: b } = parseMdx(file.content);
+    fields = {
+      ...fields, ...data,
+      tags:       Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags ?? ''),
+      metrics:    data.metrics ? data.metrics.map((m: any) => `${m.value}|${m.label}`).join(', ') : '',
+      githubLink: data.links?.github ?? '',
+      demoLink:   data.links?.demo ?? '',
+    };
+    body = b;
+  } catch (e: any) { errorMsg = `Could not load project: ${e.message}`; }
+}
+
+if (Astro.request.method === 'POST' && configured) {
+  try {
+    const form = await Astro.request.formData();
+    const g = (k: string) => form.get(k)?.toString().trim() ?? '';
+    const title = g('title');
+    const slug = isEdit ? slugParam : slugify(title);
+
+    // Parse metrics: "60s|First contact, 80%|Less manual work"
+    const rawMetrics = g('metrics');
+    const metrics = rawMetrics
+      ? rawMetrics.split(',').map(m => {
+          const [value, ...rest] = m.split('|');
+          return { value: value.trim(), label: rest.join('|').trim() };
+        }).filter(m => m.value && m.label)
+      : undefined;
+
+    const frontmatter: Record<string, any> = {
+      title, description: g('description'), summary: g('summary'),
+      category: g('category'),
+      tags: g('tags').split(',').map((t: string) => t.trim()).filter(Boolean),
+      year: Number(g('year')) || new Date().getFullYear(),
+      role: g('role'), status: g('status'), type: g('type'),
+      featured: form.get('featured') === 'on',
+      metrics: metrics?.length ? metrics : undefined,
+      links: (g('githubLink') || g('demoLink'))
+        ? { github: g('githubLink') || undefined, demo: g('demoLink') || undefined }
+        : undefined,
+    };
+
+    const content = buildMdx(frontmatter, g('body'));
+    await saveFile(`${PROJECTS_PATH}/${slug}.mdx`, content, isEdit ? sha : undefined, `CMS: ${isEdit ? 'update' : 'create'} project ${slug}`);
+    successMsg = `Project "${title}" ${isEdit ? 'updated' : 'created'}. Rebuilding…`;
+    if (!isEdit) return Astro.redirect(`/admin/cms/projects/edit?slug=${slug}&saved=1`);
+    try { const f = await getFile(`${PROJECTS_PATH}/${slug}.mdx`); sha = f.sha; } catch {}
+  } catch (e: any) { errorMsg = e.message; }
+}
+
+if (Astro.url.searchParams.get('saved')) successMsg = 'Project saved. Rebuilding…';
+---
+
+<AdminLayout title={isEdit ? `Edit: ${fields.title || slugParam}` : 'New project'}>
+  <div class="edit-header">
+    <a href="/admin/cms/projects" class="back-link">← All projects</a>
+  </div>
+
+  {!configured && <div class="notice">GitHub not configured.</div>}
+  {successMsg && <div class="alert alert-ok">{successMsg}</div>}
+  {errorMsg   && <div class="alert alert-err">{errorMsg}</div>}
+
+  <form method="POST" class="edit-form">
+    <div class="edit-grid">
+      <div class="edit-main">
+        <div class="field"><label>Title</label><input name="title" value={fields.title} required /></div>
+        <div class="field"><label>Description <span class="hint">(short, used in card)</span></label><textarea name="description" rows="2">{fields.description}</textarea></div>
+        <div class="field"><label>Summary <span class="hint">(full description)</span></label><textarea name="summary" rows="4">{fields.summary}</textarea></div>
+        <div class="field"><label>Body</label><textarea name="body" rows="12" class="body-editor">{body}</textarea></div>
+      </div>
+
+      <aside class="edit-sidebar">
+        <div class="sidebar-card">
+          <div class="field"><label>Category</label><input name="category" value={fields.category} /></div>
+          <div class="field"><label>Tags <span class="hint">comma separated</span></label><input name="tags" value={fields.tags} /></div>
+          <div class="field"><label>Year</label><input name="year" type="number" value={fields.year} /></div>
+          <div class="field"><label>Role</label><input name="role" value={fields.role} /></div>
+          <div class="field">
+            <label>Status</label>
+            <select name="status">
+              {['Live','In Progress','Archived'].map(s => <option selected={fields.status === s}>{s}</option>)}
+            </select>
+          </div>
+          <div class="field">
+            <label>Type</label>
+            <select name="type">
+              {['Internal Tool','Open Source','Client Work'].map(t => <option selected={fields.type === t}>{t}</option>)}
+            </select>
+          </div>
+          <div class="field"><label>Metrics <span class="hint">value|label, e.g. 60s|First contact</span></label><input name="metrics" value={fields.metrics} placeholder="60s|First contact, 80%|Less manual" /></div>
+          <div class="field"><label>GitHub URL</label><input name="githubLink" value={fields.githubLink} /></div>
+          <div class="field"><label>Demo URL</label><input name="demoLink" value={fields.demoLink} /></div>
+          <label class="check-label"><input type="checkbox" name="featured" checked={fields.featured} /> Featured</label>
+        </div>
+        <button type="submit" class="btn-save" disabled={!configured}>{isEdit ? 'Save changes' : 'Create project'}</button>
+      </aside>
+    </div>
+  </form>
+</AdminLayout>
+
+<style>
+  .edit-header{display:flex;align-items:center;margin-bottom:1.25rem;}
+  .back-link{font-size:.8rem;color:#4b5563;transition:color .15s;}
+  .back-link:hover{color:#9ca3af;}
+  .notice{background:#1a1200;border:1px solid #3d2e00;color:#fbbf24;padding:.875rem 1rem;border-radius:8px;margin-bottom:1.25rem;font-size:.82rem;}
+  .alert{padding:.75rem 1rem;border-radius:6px;font-size:.82rem;margin-bottom:1.25rem;}
+  .alert-ok{background:#0a1f15;border:1px solid #064e3b;color:#34d399;}
+  .alert-err{background:#1f0a0a;border:1px solid #7f1d1d;color:#f87171;}
+  .edit-grid{display:grid;grid-template-columns:1fr 260px;gap:1.5rem;align-items:start;}
+  .edit-main{display:flex;flex-direction:column;gap:1rem;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  label{font-size:.75rem;color:#6b7280;}
+  .hint{color:#374151;font-size:.7rem;}
+  input,textarea,select{background:#111;border:1px solid #2d2d2d;border-radius:6px;color:#e5e7eb;font-family:inherit;font-size:.85rem;padding:.5rem .75rem;outline:none;transition:border-color .15s;width:100%;}
+  textarea{resize:vertical;line-height:1.65;}
+  .body-editor{font-family:'Fira Code',monospace;font-size:.82rem;line-height:1.7;}
+  input:focus,textarea:focus,select:focus{border-color:#4b5563;}
+  .edit-sidebar{display:flex;flex-direction:column;gap:1rem;position:sticky;top:5rem;}
+  .sidebar-card{background:#1a1a1a;border:1px solid #2d2d2d;border-radius:8px;padding:1.25rem;display:flex;flex-direction:column;gap:.75rem;}
+  .check-label{display:flex;align-items:center;gap:8px;font-size:.8rem;color:#6b7280;cursor:pointer;}
+  .check-label input{width:auto;padding:0;}
+  .btn-save{background:#f9fafb;border:none;border-radius:6px;color:#0f0f0f;cursor:pointer;font-family:inherit;font-size:.85rem;font-weight:500;padding:.6rem;transition:opacity .15s;width:100%;}
+  .btn-save:hover:not(:disabled){opacity:.85;}
+  .btn-save:disabled{opacity:.3;cursor:not-allowed;}
+</style>

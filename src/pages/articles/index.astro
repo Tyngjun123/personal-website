@@ -1,0 +1,151 @@
+---
+// src/pages/articles/index.astro
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allArticles = await getCollection('articles', ({ data }) => !data.draft);
+const articles = allArticles.sort(
+  (a, b) => new Date(b.data.publishedDate).getTime() - new Date(a.data.publishedDate).getTime()
+);
+---
+
+<BaseLayout title="Articles" description="Practical guides on automation, n8n, APIs, and workflow tools.">
+  <section class="container page">
+    <header class="page-header">
+      <h1>Articles</h1>
+      <p class="page-sub">Practical guides on automation, n8n, APIs, and workflow tools.</p>
+    </header>
+
+    {articles.length === 0 ? (
+      <p class="empty">No articles yet — check back soon.</p>
+    ) : (
+      <ul class="article-list">
+        {articles.map(article => {
+          const date = new Date(article.data.publishedDate).toLocaleDateString('en-MY', {
+            year: 'numeric', month: 'long', day: 'numeric',
+          });
+          return (
+            <li class="article-item">
+              <a href={`/articles/${article.slug}`} class="article-link">
+                <div class="article-meta">
+                  <span class="article-cat">{article.data.category}</span>
+                  <span class="article-dot"></span>
+                  <time datetime={article.data.publishedDate}>{date}</time>
+                  {article.data.readTime && (
+                    <>
+                      <span class="article-dot"></span>
+                      <span>{article.data.readTime} read</span>
+                    </>
+                  )}
+                </div>
+                <h2 class="article-title">{article.data.title}</h2>
+                <p class="article-desc">{article.data.description}</p>
+                <div class="article-tags">
+                  {article.data.tags.slice(0, 4).map(tag => (
+                    <span class="tag">{tag}</span>
+                  ))}
+                </div>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding: 4rem 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 0.5px solid var(--color-border);
+  }
+
+  .page-header h1 {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .page-sub {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+  }
+
+  .empty {
+    color: var(--color-text-faint);
+    font-size: 0.9rem;
+  }
+
+  .article-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .article-item {
+    border-bottom: 0.5px solid var(--color-border);
+  }
+
+  .article-link {
+    display: block;
+    padding: 2rem 0;
+    transition: opacity 0.15s;
+  }
+
+  .article-link:hover { opacity: 0.7; }
+
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .article-cat {
+    font-size: 0.7rem;
+    padding: 3px 9px;
+    border-radius: 4px;
+    background: #E1F5EE;
+    color: #0F6E56;
+  }
+
+  .article-dot {
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: var(--color-border-strong);
+  }
+
+  .article-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  .article-desc {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    max-width: 620px;
+  }
+
+  .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tag {
+    font-size: 0.7rem;
+    padding: 3px 9px;
+    border: 0.5px solid var(--color-border);
+    border-radius: 20px;
+    color: var(--color-text-muted);
+  }
+</style>

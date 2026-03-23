@@ -6,6 +6,7 @@ import SEO from '../components/SEO.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { SITE } from '../config/site';
+import '../styles/global.css';
 
 interface Props {
   title?: string;
@@ -40,13 +41,11 @@ const props = Astro.props;
     <!-- SEO component handles all meta, OG, JSON-LD -->
     <SEO {...props} />
 
-    <!-- Preconnect for performance -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-    <!-- Google Fonts — DM Sans (body) + Syne (headings) -->
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Syne:wght@500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -59,97 +58,3 @@ const props = Astro.props;
   </body>
 </html>
 
-<style is:global>
-  :root {
-    --font-body: 'DM Sans', system-ui, sans-serif;
-    --font-heading: 'Syne', sans-serif;
-    --font-mono: 'Fira Code', 'Cascadia Code', monospace;
-
-    --color-text: #1a1a1a;
-    --color-text-muted: #6b7280;
-    --color-text-faint: #9ca3af;
-    --color-border: #e5e7eb;
-    --color-border-strong: #d1d5db;
-    --color-bg: #ffffff;
-    --color-bg-soft: #f9fafb;
-    --color-accent: #1a1a1a;
-
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
-
-    --max-width: 1100px;
-    --content-width: 680px;
-  }
-
-  *, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  html {
-    font-size: 16px;
-    scroll-behavior: smooth;
-    -webkit-text-size-adjust: 100%;
-  }
-
-  body {
-    font-family: var(--font-body);
-    color: var(--color-text);
-    background: var(--color-bg);
-    line-height: 1.7;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  h1, h2, h3, h4 {
-    font-family: var(--font-heading);
-    font-weight: 500;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-  }
-
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  code {
-    font-family: var(--font-mono);
-    font-size: 0.875em;
-    background: var(--color-bg-soft);
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 0.5px solid var(--color-border);
-  }
-
-  pre {
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    background: var(--color-bg-soft);
-    border: 0.5px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 1.25rem;
-    overflow-x: auto;
-    line-height: 1.65;
-  }
-
-  pre code {
-    background: none;
-    border: none;
-    padding: 0;
-    font-size: 1em;
-  }
-
-  .container {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    padding: 0 2rem;
-  }
-</style>

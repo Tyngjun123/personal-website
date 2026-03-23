@@ -13,13 +13,14 @@ const currentPath = Astro.url.pathname;
         <li>
           <a
             href={link.href}
-            class:list={['nav-link', { active: currentPath === link.href }]}
+            class:list={['nav-link', { active: currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href)) }]}
           >
             {link.label}
           </a>
         </li>
       ))}
     </ul>
+    <a href="/articles" class="nav-cta">Read Articles</a>
   </nav>
 </header>
 
@@ -28,8 +29,10 @@ const currentPath = Astro.url.pathname;
     position: sticky;
     top: 0;
     z-index: 100;
-    background: var(--color-bg);
-    border-bottom: 0.5px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
   }
 
   .nav {
@@ -37,29 +40,79 @@ const currentPath = Astro.url.pathname;
     align-items: center;
     justify-content: space-between;
     height: 56px;
+    gap: 2rem;
   }
 
   .nav-logo {
-    font-family: var(--font-heading);
-    font-size: 1.1rem;
-    font-weight: 500;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--blue-600);
     letter-spacing: -0.02em;
+    flex-shrink: 0;
   }
 
   .nav-links {
     display: flex;
     list-style: none;
-    gap: 2rem;
+    gap: 1.75rem;
+    margin: 0 auto;
   }
 
   .nav-link {
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-3);
+    position: relative;
     transition: color 0.15s;
   }
-
-  .nav-link:hover,
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: var(--blue-600);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+  }
+  .nav-link:hover {
+    color: var(--ink-2);
+  }
+  .nav-link:hover::after {
+    transform: scaleX(1);
+  }
   .nav-link.active {
-    color: var(--color-text);
+    color: var(--blue-600);
+  }
+  .nav-link.active::after {
+    transform: scaleX(1);
+  }
+
+  .nav-cta {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 20px;
+    background: var(--blue-600);
+    color: #fff;
+    border-radius: var(--radius);
+    transition: background 0.15s;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .nav-cta:hover {
+    background: var(--blue-700);
+  }
+
+  @media (max-width: 768px) {
+    .nav-links {
+      display: none;
+    }
+    .nav-cta {
+      display: none;
+    }
   }
 </style>

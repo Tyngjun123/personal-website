@@ -19,6 +19,7 @@ export const SITE = {
     twitter:   settings.social.twitter,
     facebook:  settings.social.facebook,
     instagram: settings.social.instagram,
+    tiktok:    settings.social.tiktok,
     youtube:   settings.social.youtube,
   },
   ogImage:       settings.ogImage,

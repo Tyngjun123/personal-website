@@ -5,114 +5,321 @@ import { SITE, NAV_LINKS } from '../config/site';
 const currentPath = Astro.url.pathname;
 ---
 
+<!-- ── Top bar ── -->
 <header class="nav-wrapper">
   <nav class="container nav">
     <a href="/" class="nav-logo">{SITE.name}</a>
+
     <ul class="nav-links">
       {NAV_LINKS.map(link => (
         <li>
           <a
             href={link.href}
-            class:list={['nav-link', { active: currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href)) }]}
+            class:list={['nav-link', { active: link.href === '/' ? currentPath === '/' : currentPath.startsWith(link.href) }]}
           >
             {link.label}
           </a>
         </li>
       ))}
     </ul>
-    <a href="/articles" class="nav-cta">Read Articles</a>
+
+    <div class="nav-right">
+      <a href="/articles" class="nav-cta">Read Articles</a>
+      <!-- Hamburger (mobile only) -->
+      <button id="nav-hamburger" class="nav-hamburger" aria-label="Open menu">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
   </nav>
 </header>
 
+<!-- ── Backdrop ── -->
+<div id="nav-backdrop" class="nav-backdrop"></div>
+
+<!-- ── Right drawer ── -->
+<nav id="nav-drawer" class="nav-drawer" aria-hidden="true">
+
+  <div class="nav-drawer-header">
+    <span class="nav-drawer-logo">{SITE.name}</span>
+    <button id="nav-close" class="nav-drawer-close" aria-label="Close menu">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="nav-drawer-profile">
+    <div class="nav-drawer-avatar">{SITE.author.slice(0,2).toUpperCase()}</div>
+    <div>
+      <div class="nav-drawer-name">{SITE.author}</div>
+      <div class="nav-drawer-role">{SITE.authorRole} · {SITE.location}</div>
+    </div>
+  </div>
+
+  <div class="nav-drawer-links">
+    <a href="/" class="nav-drawer-item">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <polyline points="9,22 9,12 15,12 15,22"/>
+      </svg>
+      <span>Home</span>
+    </a>
+    <a href="/projects" class="nav-drawer-item">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span>Projects</span>
+    </a>
+    <a href="/certificates" class="nav-drawer-item">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+      <span>Certificates</span>
+    </a>
+    <a href="/articles" class="nav-drawer-item">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+        <polyline points="14,2 14,8 20,8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      <span>Articles</span>
+    </a>
+  </div>
+
+  <div class="nav-drawer-social">
+    <p class="nav-drawer-social-label">Connect</p>
+    <div class="nav-drawer-social-icons">
+      {SITE.email && (
+        <a href={`mailto:${SITE.email}`} class="nav-drawer-social-icon" aria-label="Email">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </a>
+      )}
+      {SITE.social.github && (
+        <a href={SITE.social.github} target="_blank" rel="noopener" class="nav-drawer-social-icon" aria-label="GitHub">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/>
+          </svg>
+        </a>
+      )}
+      {SITE.social.linkedin && (
+        <a href={SITE.social.linkedin} target="_blank" rel="noopener" class="nav-drawer-social-icon" aria-label="LinkedIn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/>
+            <rect x="2" y="9" width="4" height="12"/>
+            <circle cx="4" cy="4" r="2"/>
+          </svg>
+        </a>
+      )}
+      {SITE.social.facebook && (
+        <a href={SITE.social.facebook} target="_blank" rel="noopener" class="nav-drawer-social-icon" aria-label="Facebook">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+          </svg>
+        </a>
+      )}
+    </div>
+  </div>
+
+  <div class="nav-drawer-cta">
+    <a href={`mailto:${SITE.email}`} class="nav-drawer-cta-btn">Let's connect</a>
+  </div>
+
+</nav>
+
+<script>
+  const hamburger = document.getElementById('nav-hamburger');
+  const drawer    = document.getElementById('nav-drawer');
+  const backdrop  = document.getElementById('nav-backdrop');
+  const closeBtn  = document.getElementById('nav-close');
+
+  function openDrawer() {
+    drawer?.classList.add('open');
+    backdrop?.classList.add('open');
+    drawer?.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    drawer?.classList.remove('open');
+    backdrop?.classList.remove('open');
+    drawer?.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  hamburger?.addEventListener('click', openDrawer);
+  closeBtn?.addEventListener('click', closeDrawer);
+  backdrop?.addEventListener('click', closeDrawer);
+
+  drawer?.querySelectorAll('.nav-drawer-item').forEach(link => {
+    link.addEventListener('click', closeDrawer);
+  });
+
+  // Active link highlight
+  const path = window.location.pathname;
+  drawer?.querySelectorAll('.nav-drawer-item').forEach(link => {
+    const href = link.getAttribute('href');
+    if (href && (href === '/' ? path === '/' : path.startsWith(href))) {
+      link.classList.add('active');
+    }
+  });
+</script>
+
 <style>
+  /* ── Top nav bar ── */
   .nav-wrapper {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border);
   }
-
   .nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 56px;
-    gap: 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px; gap: 2rem;
   }
-
   .nav-logo {
-    font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--blue-600);
-    letter-spacing: -0.02em;
-    flex-shrink: 0;
+    font-family: var(--font-display); font-size: 20px; font-weight: 700;
+    color: var(--blue-600); letter-spacing: -0.02em; flex-shrink: 0;
   }
-
-  .nav-links {
-    display: flex;
-    list-style: none;
-    gap: 1.75rem;
-    margin: 0 auto;
-  }
-
+  .nav-links { display: flex; list-style: none; gap: 1.75rem; margin: 0 auto; }
   .nav-link {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--ink-3);
-    position: relative;
-    transition: color 0.15s;
+    font-size: 13px; font-weight: 500; color: var(--ink-3);
+    position: relative; transition: color 0.15s;
   }
   .nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 1.5px;
-    background: var(--blue-600);
-    border-radius: 2px;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.2s ease;
+    content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+    height: 1.5px; background: var(--blue-600); border-radius: 2px;
+    transform: scaleX(0); transform-origin: left; transition: transform 0.2s ease;
   }
-  .nav-link:hover {
-    color: var(--ink-2);
-  }
-  .nav-link:hover::after {
-    transform: scaleX(1);
-  }
-  .nav-link.active {
-    color: var(--blue-600);
-  }
-  .nav-link.active::after {
-    transform: scaleX(1);
-  }
+  .nav-link:hover { color: var(--ink-2); }
+  .nav-link:hover::after { transform: scaleX(1); }
+  .nav-link.active { color: var(--blue-600); }
+  .nav-link.active::after { transform: scaleX(1); }
+
+  .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 
   .nav-cta {
-    font-size: 13px;
-    font-weight: 600;
-    padding: 8px 20px;
-    background: var(--blue-600);
-    color: #fff;
-    border-radius: var(--radius);
-    transition: background 0.15s;
-    flex-shrink: 0;
-    white-space: nowrap;
+    font-size: 13px; font-weight: 600; padding: 8px 20px;
+    background: var(--blue-600); color: #fff; border-radius: var(--radius);
+    transition: background 0.15s; white-space: nowrap;
   }
-  .nav-cta:hover {
-    background: var(--blue-700);
+  .nav-cta:hover { background: var(--blue-700); }
+
+  .nav-hamburger {
+    display: none; width: 36px; height: 36px; border-radius: var(--radius);
+    background: var(--bg); border: 1px solid var(--border);
+    align-items: center; justify-content: center;
+    color: var(--ink-2); cursor: pointer; font-family: inherit;
+    transition: border-color 0.15s, background 0.15s;
   }
+  .nav-hamburger:hover { border-color: var(--blue-200); background: var(--blue-50); }
 
   @media (max-width: 768px) {
-    .nav-links {
-      display: none;
-    }
-    .nav-cta {
-      display: none;
-    }
+    .nav-links { display: none; }
+    .nav-cta   { display: none; }
+    .nav-hamburger { display: flex; }
   }
+
+  /* ── Backdrop ── */
+  .nav-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(15, 23, 42, 0.4); z-index: 150;
+    backdrop-filter: blur(2px);
+  }
+  .nav-backdrop.open { display: block; }
+
+  /* ── Right drawer ── */
+  .nav-drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 280px;
+    background: var(--white); z-index: 200;
+    transform: translateX(100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; flex-direction: column;
+    box-shadow: -8px 0 32px rgba(0,0,0,0.12);
+  }
+  .nav-drawer.open { transform: translateX(0); }
+
+  @media (min-width: 769px) {
+    .nav-drawer, .nav-backdrop { display: none !important; }
+  }
+
+  /* Drawer header */
+  .nav-drawer-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 20px 16px; border-bottom: 1px solid var(--border);
+  }
+  .nav-drawer-logo {
+    font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--blue-600);
+  }
+  .nav-drawer-close {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-3); cursor: pointer; font-family: inherit;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .nav-drawer-close:hover { background: var(--blue-50); border-color: var(--blue-200); color: var(--blue-600); }
+
+  /* Drawer profile */
+  .nav-drawer-profile {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+  }
+  .nav-drawer-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--blue-100); border: 2px solid var(--blue-200);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 14px; font-weight: 800;
+    color: var(--blue-600); flex-shrink: 0;
+  }
+  .nav-drawer-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .nav-drawer-role { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+
+  /* Drawer links */
+  .nav-drawer-links { flex: 1; padding: 8px 0; overflow-y: auto; }
+  .nav-drawer-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 20px; font-size: 15px; font-weight: 500; color: var(--ink-3);
+    text-decoration: none; transition: background 0.15s, color 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .nav-drawer-item:hover { background: var(--blue-50); color: var(--blue-600); }
+  .nav-drawer-item.active {
+    background: var(--blue-50); color: var(--blue-600);
+    border-left-color: var(--blue-600); font-weight: 600;
+  }
+  .nav-drawer-item svg { flex-shrink: 0; }
+  .nav-drawer-item.active svg { stroke: var(--blue-600); }
+
+  /* Drawer social */
+  .nav-drawer-social { padding: 16px 20px; border-top: 1px solid var(--border); }
+  .nav-drawer-social-label {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 10px;
+  }
+  .nav-drawer-social-icons { display: flex; gap: 8px; }
+  .nav-drawer-social-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    background: var(--bg); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .nav-drawer-social-icon:hover { border-color: var(--blue-200); background: var(--blue-50); }
+  .nav-drawer-social-icon:hover svg { stroke: var(--blue-600); }
+
+  /* Drawer CTA */
+  .nav-drawer-cta { padding: 12px 20px 20px; }
+  .nav-drawer-cta-btn {
+    display: block; text-align: center; font-size: 14px; font-weight: 600;
+    padding: 12px; background: var(--blue-600); color: #fff;
+    border-radius: var(--radius); text-decoration: none; transition: background 0.15s;
+  }
+  .nav-drawer-cta-btn:hover { background: var(--blue-700); }
 </style>

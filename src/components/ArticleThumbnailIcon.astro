@@ -1,0 +1,32 @@
+---
+// src/components/ArticleThumbnailIcon.astro
+interface Props { category: string; }
+const { category } = Astro.props;
+const cat = category.toLowerCase();
+---
+
+{cat.includes('automation') || cat.includes('n8n') ? (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+    <rect x="4" y="8" width="10" height="10" rx="3" fill="#bfdbfe"/>
+    <rect x="26" y="8" width="10" height="10" rx="3" fill="#bfdbfe"/>
+    <rect x="15" y="22" width="10" height="10" rx="3" fill="#2563eb"/>
+    <path d="M9 18v2a4 4 0 004 4h7M31 18v2a4 4 0 01-4 4h-7M20 26v-4" stroke="#2563eb" stroke-width="1.8" stroke-linecap="round"/>
+  </svg>
+) : cat.includes('seo') ? (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+    <path d="M20 6v28M10 17l10-11 10 11" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M6 34h28" stroke="#059669" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+) : cat.includes('dev') || cat.includes('tutorial') ? (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+    <rect x="4" y="10" width="32" height="20" rx="4" stroke="#7c3aed" stroke-width="1.8"/>
+    <path d="M14 18l-5 4 5 4M26 18l5 4-5 4" stroke="#7c3aed" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M18 26l4-8" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>
+) : (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+    <rect x="6" y="6" width="28" height="28" rx="5" stroke="#2563eb" stroke-width="1.8"/>
+    <path d="M13 18h14M13 24h10" stroke="#2563eb" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M13 12h7" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>
+)}

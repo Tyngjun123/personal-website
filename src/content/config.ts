@@ -46,6 +46,9 @@ const projects = defineCollection({
       github: z.string().optional(),
       demo: z.string().optional(),
     }).optional(),
+    problem:  z.string().optional(),
+    solution: z.string().optional(),
+    outcomes: z.array(z.string()).optional(),
   }),
 });
 
@@ -62,6 +65,9 @@ const certificates = defineCollection({
     expiryDate: z.string().optional(),
     credentialUrl: z.string().optional(),
     featured: z.boolean().default(false),
+    description: z.string().optional(),
+    inProgress: z.boolean().default(false),
+    progress: z.number().optional(),
   }),
 });
 

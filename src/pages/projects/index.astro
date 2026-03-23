@@ -22,7 +22,23 @@ const projects = allProjects.sort((a, b) => b.data.year - a.data.year);
     ) : (
       <ul class="project-grid">
         {projects.map((project, i) => (
-          <li class:list={['project-card', { 'proj-featured': i < 2 }]}>
+          <li
+            class:list={['project-card', { 'proj-featured': i < 2 }]}
+            role="button"
+            tabindex="0"
+            data-modal="project"
+            data-title={project.data.title}
+            data-description={project.data.description}
+            data-category={project.data.category}
+            data-status={project.data.status}
+            data-tags={JSON.stringify(project.data.tags)}
+            data-cover={project.data.cover ?? ''}
+            data-metrics={JSON.stringify(project.data.metrics ?? [])}
+            data-links={JSON.stringify(project.data.links ?? {})}
+            data-problem={project.data.problem ?? ''}
+            data-solution={project.data.solution ?? ''}
+            data-outcomes={JSON.stringify(project.data.outcomes ?? [])}
+          >
             {i < 2 && <div class="proj-top-bar" aria-hidden="true"></div>}
             <div class="proj-blob" aria-hidden="true"></div>
 
@@ -53,16 +69,7 @@ const projects = allProjects.sort((a, b) => b.data.year - a.data.year);
               ))}
             </div>
 
-            {(project.data.links?.github || project.data.links?.demo) && (
-              <div class="project-links">
-                {project.data.links.github && (
-                  <a href={project.data.links.github} target="_blank" rel="noopener noreferrer" class="project-link">GitHub →</a>
-                )}
-                {project.data.links.demo && (
-                  <a href={project.data.links.demo} target="_blank" rel="noopener noreferrer" class="project-link">Live demo →</a>
-                )}
-              </div>
-            )}
+            <span class="card-hint">View details →</span>
           </li>
         ))}
       </ul>
@@ -70,198 +77,243 @@ const projects = allProjects.sort((a, b) => b.data.year - a.data.year);
   </section>
 </BaseLayout>
 
+<script is:inline>
+  // ── Modal controller ──────────────────────────────────
+  const backdrop = document.getElementById('modal-backdrop');
+  const panel    = document.getElementById('modal-panel');
+  const closeBtn = document.getElementById('modal-close');
+
+  function openModal() {
+    backdrop.classList.add('open');
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => closeBtn && closeBtn.focus(), 50);
+  }
+  function closeModal() {
+    backdrop.classList.remove('open');
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  backdrop && backdrop.addEventListener('click', closeModal);
+  closeBtn && closeBtn.addEventListener('click', closeModal);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && panel && panel.classList.contains('open')) closeModal();
+  });
+
+  // Swipe-down to close (mobile)
+  var touchStartY = 0;
+  panel && panel.addEventListener('touchstart', function(e) {
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  panel && panel.addEventListener('touchmove', function(e) {
+    var dy = e.touches[0].clientY - touchStartY;
+    if (dy > 0 && panel.scrollTop === 0) {
+      panel.style.transform = 'translateY(' + Math.min(dy * 0.4, 80) + 'px)';
+    }
+  }, { passive: true });
+  panel && panel.addEventListener('touchend', function(e) {
+    var dy = e.changedTouches[0].clientY - touchStartY;
+    panel.style.transform = '';
+    if (dy > 80) closeModal();
+  });
+
+  function setText(id, value) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = value || '';
+  }
+  function setHTML(id, value) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = value || '';
+  }
+  function show(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = '';
+  }
+  function hide(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  }
+
+  // ── Project modal ──────────────────────────────────────
+  function openProjectModal(data) {
+    setText('modal-tag', data.category || '');
+
+    var statusEl = document.getElementById('modal-status');
+    if (statusEl) {
+      statusEl.textContent = data.status || '';
+      statusEl.className = 'modal-status';
+      if (data.status === 'Live') statusEl.classList.add('live');
+      else if (data.status === 'In Progress') statusEl.classList.add('progress');
+      statusEl.style.display = data.status ? '' : 'none';
+    }
+
+    if (data.cover) {
+      var img = document.getElementById('modal-cover-img');
+      if (img) { img.src = data.cover; img.alt = data.title; }
+      show('modal-cover');
+    } else {
+      hide('modal-cover');
+    }
+
+    setText('modal-title', data.title);
+    setText('modal-desc', data.description);
+
+    if (data.metrics && data.metrics.length > 0) {
+      setHTML('modal-metrics', data.metrics.map(function(m) {
+        return '<div class="modal-metric-card"><div class="modal-metric-val">' + m.value + '</div><div class="modal-metric-label">' + m.label + '</div></div>';
+      }).join(''));
+      show('modal-metrics');
+    } else {
+      hide('modal-metrics');
+    }
+
+    var contentHTML = '';
+    if (data.problem) {
+      contentHTML += '<p class="modal-section-label">The problem</p><p class="modal-prose">' + data.problem + '</p>';
+    }
+    if (data.solution) {
+      contentHTML += '<p class="modal-section-label">How it works</p><p class="modal-prose">' + data.solution + '</p>';
+    }
+    if (data.outcomes && data.outcomes.length > 0) {
+      contentHTML += '<p class="modal-section-label">Outcomes</p><div class="modal-outcome-list">' +
+        data.outcomes.map(function(o) {
+          return '<div class="modal-outcome-item"><div class="modal-outcome-dot"></div><span>' + o + '</span></div>';
+        }).join('') + '</div>';
+    }
+    setHTML('modal-content', contentHTML);
+
+    if (data.tags && data.tags.length > 0) {
+      setHTML('modal-stack-pills', data.tags.map(function(t) {
+        return '<span class="modal-pill">' + t + '</span>';
+      }).join(''));
+      show('modal-stack');
+    } else {
+      hide('modal-stack');
+    }
+
+    var linksHTML = '';
+    if (data.links && data.links.demo) {
+      linksHTML += '<a href="' + data.links.demo + '" target="_blank" rel="noopener" class="modal-link-btn primary">View demo →</a>';
+    }
+    if (data.links && data.links.github) {
+      linksHTML += '<a href="' + data.links.github + '" target="_blank" rel="noopener" class="modal-link-btn">GitHub →</a>';
+    }
+    if (linksHTML) {
+      setHTML('modal-links', linksHTML);
+      show('modal-links');
+    } else {
+      hide('modal-links');
+    }
+
+    openModal();
+  }
+
+  // ── Bind cards ─────────────────────────────────────────
+  document.querySelectorAll('[data-modal="project"]').forEach(function(card) {
+    function open() {
+      openProjectModal({
+        title:       card.dataset.title,
+        description: card.dataset.description,
+        category:    card.dataset.category,
+        status:      card.dataset.status,
+        tags:        JSON.parse(card.dataset.tags || '[]'),
+        cover:       card.dataset.cover || null,
+        metrics:     JSON.parse(card.dataset.metrics || '[]'),
+        links:       JSON.parse(card.dataset.links || '{}'),
+        problem:     card.dataset.problem,
+        solution:    card.dataset.solution,
+        outcomes:    JSON.parse(card.dataset.outcomes || '[]'),
+      });
+    }
+    card.addEventListener('click', open);
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+    });
+  });
+</script>
+
 <style>
-  /* Page hero header */
   .page-hero {
     background: linear-gradient(180deg, var(--bg) 0%, var(--white) 100%);
     border-bottom: 1px solid var(--border);
     padding: 48px 0 40px;
   }
   .eyebrow {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--blue-500);
-    margin-bottom: 8px;
+    display: block; font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--blue-500); margin-bottom: 8px;
   }
   .page-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    color: var(--ink);
-    margin-bottom: 8px;
+    font-family: var(--font-display); font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 700; letter-spacing: -0.025em; color: var(--ink); margin-bottom: 8px;
   }
-  .page-sub {
-    font-size: 14px;
-    color: var(--ink-3);
-  }
+  .page-sub { font-size: 14px; color: var(--ink-3); }
+  .page-body { padding: 40px 2rem 5rem; }
+  .empty { font-size: 14px; color: var(--ink-4); }
 
-  .page-body {
-    padding: 40px 2rem 5rem;
-  }
-
-  .empty {
-    font-size: 14px;
-    color: var(--ink-4);
-  }
-
-  /* Grid */
   .project-grid {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 12px;
+    list-style: none; display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px;
   }
 
-  /* Card */
   .project-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s, transform 0.2s;
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px;
+    display: flex; flex-direction: column; gap: 10px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
   }
   .project-card:hover {
-    border-color: var(--blue-200);
-    transform: translateY(-2px);
+    border-color: var(--blue-200); transform: translateY(-2px);
+    box-shadow: 0 4px 24px rgba(37,99,235,0.08);
   }
-  .proj-featured {
-    border-color: var(--blue-200);
+  .project-card:focus-visible {
+    outline: 2px solid var(--blue-400); outline-offset: 2px;
   }
+  .proj-featured { border-color: var(--blue-200); }
   .proj-top-bar {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--blue-500), #6366f1);
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--gradient-bar);
   }
   .proj-blob {
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 120px; height: 120px;
-    border-radius: 50%;
-    background: var(--blue-50);
-    pointer-events: none;
+    position: absolute; top: -40px; right: -40px;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--blue-50); pointer-events: none;
   }
 
-  .project-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
+  .project-top { display: flex; justify-content: space-between; align-items: center; }
   .project-cat {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--blue-600);
-    background: var(--blue-50);
-    border: 1px solid var(--blue-200);
-    padding: 3px 9px;
-    border-radius: 4px;
+    font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--blue-600); background: var(--blue-50);
+    border: 1px solid var(--blue-200); padding: 3px 9px; border-radius: 4px;
   }
+  .project-status { font-family: var(--font-mono); font-size: 10px; font-weight: 500; padding: 3px 9px; border-radius: 20px; }
+  .status-live { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .status-other { background: var(--bg); color: var(--ink-3); border: 1px solid var(--border); }
 
-  .project-status {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 500;
-    padding: 3px 9px;
-    border-radius: 20px;
-  }
-  .status-live {
-    background: var(--green-bg);
-    color: var(--green);
-    border: 1px solid var(--green-border);
-  }
-  .status-other {
-    background: var(--bg);
-    color: var(--ink-3);
-    border: 1px solid var(--border);
-  }
+  .project-title { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.45; }
+  .project-desc { font-size: 12px; color: var(--ink-3); line-height: 1.65; }
 
-  .project-title {
-    font-family: var(--font-display);
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
-    line-height: 1.45;
-  }
+  .project-metrics { display: flex; gap: 20px; padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric { display: flex; flex-direction: column; gap: 2px; }
+  .metric-value { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--blue-600); }
+  .metric-label { font-size: 10px; color: var(--ink-4); text-transform: uppercase; letter-spacing: 0.04em; }
 
-  .project-desc {
-    font-size: 12px;
-    color: var(--ink-3);
-    line-height: 1.65;
-  }
+  .project-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); background: var(--bg); border: 1px solid var(--border); padding: 2px 8px; border-radius: 20px; }
 
-  .project-metrics {
-    display: flex;
-    gap: 20px;
-    padding: 12px 0;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
+  /* Hover hint */
+  .card-hint {
+    font-family: var(--font-mono); font-size: 0.7rem; color: var(--blue-500);
+    margin-top: 4px; opacity: 0; transition: opacity 0.15s;
   }
-  .metric {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .metric-value {
-    font-family: var(--font-display);
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--blue-600);
-  }
-  .metric-label {
-    font-size: 10px;
-    color: var(--ink-4);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .project-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-  .tag {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--ink-3);
-    background: var(--bg);
-    border: 1px solid var(--border);
-    padding: 2px 8px;
-    border-radius: 20px;
-  }
-
-  .project-links {
-    display: flex;
-    gap: 12px;
-    margin-top: auto;
-    padding-top: 4px;
-  }
-  .project-link {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--blue-600);
-    transition: color 0.15s;
-  }
-  .project-link:hover {
-    color: var(--blue-700);
-  }
+  .project-card:hover .card-hint { opacity: 1; }
 
   @media (max-width: 640px) {
-    .project-grid {
-      grid-template-columns: 1fr;
-    }
+    .project-grid { grid-template-columns: 1fr; }
   }
 </style>

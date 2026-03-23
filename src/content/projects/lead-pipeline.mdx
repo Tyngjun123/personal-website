@@ -16,6 +16,13 @@ metrics:
 links:
   github: ""
   demo: ""
+problem: "The sales team was manually copying leads from Google Forms into WhatsApp, Telegram, and a spreadsheet — a process that took 20–30 minutes per lead and introduced constant errors."
+solution: "An n8n workflow triggers on every new form submission, writes the lead to MySQL, sends a personalized WhatsApp message via Fonnte within 60 seconds, and notifies the team on Telegram automatically."
+outcomes:
+  - "First contact time reduced from ~25 minutes to under 60 seconds"
+  - "80% reduction in manual follow-up work for the sales team"
+  - "Lead data always in sync across WhatsApp, Telegram, and the database"
+  - "Running in production for 6+ months with zero downtime"
 ---
 
 A fully automated lead pipeline built with n8n, replacing a manual copy-paste process that was costing the team hours every week.

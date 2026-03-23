@@ -29,19 +29,17 @@ const latestArticles = allArticles
       <div class="hero-left">
         <div class="hero-badge anim-1">
           <span class="badge-dot"></span>
-          AI Automation Engineer · Malaysia
+          {SITE.authorRole} · {SITE.location}
         </div>
 
         <h1 class="hero-h1 anim-2">
-          <span class="h1-plain">Hi, I'm TJ.</span><br />
+          <span class="h1-plain">Hi, I'm {SITE.author}.</span><br />
           <span class="h1-gradient">I build systems</span><br />
           <span class="h1-plain">that think.</span>
         </h1>
 
         <p class="hero-desc anim-3">
-          Product Owner specializing in workflow automation, AI-powered pipelines,
-          and eliminating every task a machine can do better — n8n, APIs, and
-          zero tolerance for manual work.
+          {SITE.authorBio}
         </p>
 
         <div class="hero-btns anim-4">
@@ -69,7 +67,7 @@ const latestArticles = allArticles
       <div class="hero-photo-col">
         <div class="photo-frame">
           <div class="photo-inner">
-            <span class="photo-initials">TJ</span>
+            <span class="photo-initials">{SITE.author.slice(0,2).toUpperCase()}</span>
           </div>
         </div>
         <p class="photo-hint">Add photo to /public/images/tj-photo.jpg</p>

@@ -28,7 +28,14 @@
       "period": "2022 – Present",
       "current": true,
       "description": "Leading automation strategy across promotions, lead management, and member communications. Built 20+ n8n workflows eliminating thousands of manual hours annually.",
-      "tags": ["n8n", "MySQL", "WhatsApp API", "Telegram Bot", "Notion", "Product Strategy"]
+      "tags": [
+        "n8n",
+        "MySQL",
+        "WhatsApp API",
+        "Telegram Bot",
+        "Notion",
+        "Product Strategy"
+      ]
     },
     {
       "company": "Previous Company",
@@ -36,15 +43,22 @@
       "period": "2020 – 2022",
       "current": false,
       "description": "Managed cross-functional teams and streamlined internal processes. First exposure to workflow automation and API integrations that sparked a passion for systematic efficiency.",
-      "tags": ["Operations", "Process Design", "Team Management", "Project Coordination"]
+      "tags": [
+        "Operations",
+        "Process Design",
+        "Team Management",
+        "Project Coordination"
+      ]
     }
   ],
   "education": [
     {
-      "school": "University Name",
+      "school": "university name 1",
       "degree": "Bachelor's Degree",
       "period": "2016 – 2020",
-      "tags": ["Subject 1", "Subject 2", "Subject 3"]
+      "tags": [
+        "afdsfsfsdd"
+      ]
     }
   ]
 }

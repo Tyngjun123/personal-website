@@ -123,55 +123,56 @@ const education = SITE.education;
         <h2 class="journey-title">TJ's <span>Journey</span></h2>
       </div>
 
-      <div class="journey-grid">
-        <!-- Left: Education -->
-        <div class="journey-col journey-col--edu">
-          <p class="journey-col-label">Education</p>
-          {education.map((edu, i) => (
-            <div class="journey-item reveal-item" style={`transition-delay: ${i * 0.15}s`}>
-              <div class="journey-card">
-                <div class="journey-card-school">{edu.school}</div>
-                <div class="journey-card-degree">{edu.degree}</div>
-                <div class="journey-card-period">{edu.period}</div>
+      <div class="jt-wrap">
+        <!-- Vertical line -->
+        <div class="jt-vline" aria-hidden="true"></div>
+
+        <!-- Column labels -->
+        <div class="jt-cell jt-cell--left"><span class="jt-col-label">Education</span></div>
+        <div class="jt-cell jt-cell--center"></div>
+        <div class="jt-cell jt-cell--right"><span class="jt-col-label">Work Experience</span></div>
+
+        <!-- Education items: card LEFT · dot CENTER · date RIGHT -->
+        {education.map((edu, i) => (
+          <>
+            <div class="jt-cell jt-cell--left reveal-item" style={`transition-delay: ${i * 0.1}s`}>
+              <div class="jt-card">
+                <div class="jt-card-name">{edu.school}</div>
+                <div class="jt-card-sub">{edu.degree}</div>
                 {edu.tags && edu.tags.length > 0 && (
-                  <div class="journey-tags">
-                    {edu.tags.map((t: string) => <span class="journey-tag">{t}</span>)}
+                  <div class="jt-tags">
+                    {edu.tags.map((t: string) => <span class="jt-tag">{t}</span>)}
                   </div>
                 )}
               </div>
-              <div class="journey-dot"></div>
             </div>
-          ))}
-        </div>
+            <div class="jt-cell jt-cell--center"><div class="jt-dot"></div></div>
+            <div class="jt-cell jt-cell--right"><span class="jt-period">{edu.period}</span></div>
+          </>
+        ))}
 
-        <!-- Center line -->
-        <div class="journey-line-col" aria-hidden="true">
-          <div class="journey-line"></div>
-        </div>
-
-        <!-- Right: Work Experience -->
-        <div class="journey-col journey-col--work">
-          <p class="journey-col-label">Work Experience</p>
-          {workExperience.map((job, i) => (
-            <div
-              class:list={['journey-item', 'journey-item--work', { 'journey-item--current': job.current }, 'reveal-item']}
-              style={`transition-delay: ${i * 0.15}s`}
-            >
-              <div class="journey-dot"></div>
-              <div class="journey-card">
-                <div class="journey-card-company">{job.company}</div>
-                <div class="journey-card-role">{job.role}</div>
-                <div class="journey-card-period">{job.period}</div>
-                {job.description && <p class="journey-card-desc">{job.description}</p>}
+        <!-- Work items: date LEFT · dot CENTER · card RIGHT -->
+        {workExperience.map((job, i) => (
+          <>
+            <div class="jt-cell jt-cell--left"><span class="jt-period jt-period--right">{job.period}</span></div>
+            <div class="jt-cell jt-cell--center">
+              <div class:list={['jt-dot', { 'jt-dot--current': job.current }]}></div>
+            </div>
+            <div class="jt-cell jt-cell--right reveal-item" style={`transition-delay: ${i * 0.1}s`}>
+              <div class:list={['jt-card', { 'jt-card--current': job.current }]}>
+                <div class="jt-card-name">{job.company}</div>
+                <div class="jt-card-sub">{job.role}</div>
+                {job.description && <p class="jt-card-desc">{job.description}</p>}
                 {job.tags && job.tags.length > 0 && (
-                  <div class="journey-tags">
-                    {job.tags.map((t: string) => <span class="journey-tag">{t}</span>)}
+                  <div class="jt-tags">
+                    {job.tags.map((t: string) => <span class="jt-tag">{t}</span>)}
                   </div>
                 )}
               </div>
             </div>
-          ))}
-        </div>
+          </>
+        ))}
+
       </div>
     </div>
   </section>
@@ -707,98 +708,89 @@ const education = SITE.education;
     background-clip: text;
   }
 
-  .journey-grid {
+  /* Flat 3-col grid: [left] [center-dot 52px] [right] */
+  .jt-wrap {
+    position: relative;
     display: grid;
-    grid-template-columns: 1fr 2px 1fr;
-    gap: 0 20px;
+    grid-template-columns: 1fr 52px 1fr;
+    row-gap: 20px;
     align-items: start;
     position: relative; z-index: 1;
   }
 
-  .journey-line-col { display: flex; justify-content: center; padding-top: 0; }
-  .journey-line {
-    width: 2px; min-height: 100%;
-    background: linear-gradient(180deg, var(--blue-500) 0%, #6366f1 50%, rgba(99,102,241,0.1) 100%);
+  /* The vertical line runs through the center column */
+  .jt-vline {
+    position: absolute;
+    left: 50%; transform: translateX(-50%);
+    top: 0; bottom: 0; width: 2px;
+    background: linear-gradient(180deg, var(--blue-400) 0%, #6366f1 55%, rgba(99,102,241,0.08) 100%);
+    z-index: 0;
   }
 
-  .journey-col { display: flex; flex-direction: column; gap: 20px; }
-  .journey-col-label {
+  .jt-cell { position: relative; z-index: 1; }
+  .jt-cell--left  { display: flex; justify-content: flex-end; align-items: flex-start; padding-right: 20px; }
+  .jt-cell--center { display: flex; justify-content: center; align-items: flex-start; padding-top: 14px; }
+  .jt-cell--right { display: flex; justify-content: flex-start; align-items: flex-start; padding-left: 20px; }
+
+  .jt-col-label {
     font-family: var(--font-mono); font-size: 10px; font-weight: 600;
     letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--ink-4); margin-bottom: 4px;
+    color: var(--ink-4); padding-bottom: 4px;
   }
-  .journey-col--edu { align-items: flex-end; }
-  .journey-col--edu .journey-col-label { text-align: right; }
-  .journey-col--work { align-items: flex-start; }
+  .jt-cell--left .jt-col-label { text-align: right; }
 
-  .journey-item {
-    display: flex; align-items: flex-start; gap: 0; width: 100%;
-  }
-  .journey-col--edu .journey-item { flex-direction: row-reverse; }
-  .journey-col--work .journey-item { flex-direction: row; }
-
-  .journey-dot {
-    width: 14px; height: 14px; flex-shrink: 0; border-radius: 50%;
+  .jt-dot {
+    width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
     background: var(--gradient);
     border: 2px solid var(--white);
     box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
-    margin-top: 16px; position: relative; z-index: 2;
+    position: relative; z-index: 2;
   }
-  .journey-item--current .journey-dot { animation: pulse-ring 2.5s ease-in-out infinite; }
+  .jt-dot--current { animation: pulse-ring 2.5s ease-in-out infinite; }
 
-  .journey-card {
-    flex: 1; padding: 14px 16px;
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  .jt-period {
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink-4);
+    padding-top: 12px; white-space: nowrap; line-height: 1;
   }
-  .journey-card:hover {
-    border-color: var(--blue-200);
-    box-shadow: 0 4px 16px rgba(37,99,235,0.07);
-  }
-  .journey-item--current .journey-card {
-    border-color: var(--blue-200); background: var(--blue-50);
-  }
-  .journey-col--edu .journey-card { margin-right: 10px; text-align: right; }
-  .journey-col--work .journey-card { margin-left: 10px; text-align: left; }
+  .jt-period--right { text-align: right; }
 
-  .journey-card-school, .journey-card-company {
-    font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 3px;
+  .jt-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 14px 16px; width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .journey-card-degree, .journey-card-role {
+  .jt-card:hover { border-color: var(--blue-200); box-shadow: 0 4px 16px rgba(37,99,235,0.07); }
+  .jt-card--current { border-color: var(--blue-200); background: var(--blue-50); }
+
+  .jt-card-name { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+  .jt-card-sub {
     font-size: 12px; font-weight: 600;
     background: var(--gradient);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text; margin-bottom: 4px;
+    background-clip: text; margin-bottom: 6px;
   }
-  .journey-card-period {
+  .jt-card-desc { font-size: 12px; color: var(--ink-3); line-height: 1.7; margin-bottom: 10px; }
+  .jt-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .jt-tag {
     font-family: var(--font-mono); font-size: 10px;
-    color: var(--ink-4); margin-bottom: 8px;
-  }
-  .journey-card-desc {
-    font-size: 12px; color: var(--ink-3); line-height: 1.7; margin-bottom: 10px;
-  }
-  .journey-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-  .journey-col--edu .journey-tags { justify-content: flex-end; }
-  .journey-tag {
-    font-family: var(--font-mono); font-size: 10px;
-    color: var(--ink-3);
-    background: var(--bg);
-    border: 1px solid var(--border);
+    color: var(--ink-3); background: var(--bg); border: 1px solid var(--border);
     padding: 2px 7px; border-radius: 20px;
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: 640px) {
     .journey-watermark { display: none; }
-    .journey-grid { grid-template-columns: 1fr; gap: 28px; }
-    .journey-line-col { display: none; }
-    .journey-col { align-items: stretch; gap: 14px; }
-    .journey-col--edu { align-items: stretch; }
-    .journey-col--edu .journey-col-label { text-align: left; }
-    .journey-col--edu .journey-item { flex-direction: row; }
-    .journey-col--edu .journey-card { margin-right: 0; margin-left: 10px; text-align: left; }
-    .journey-col--edu .journey-tags { justify-content: flex-start; }
+    /* Compress to narrower center column */
+    .jt-wrap { grid-template-columns: 1fr 24px 1fr; row-gap: 12px; }
+    .jt-cell--left  { padding-right: 8px; }
+    .jt-cell--center { padding-top: 12px; }
+    .jt-cell--right { padding-left: 8px; }
+    .jt-dot { width: 12px; height: 12px; }
+    .jt-card { padding: 10px 12px; }
+    .jt-card-name { font-size: 12px; }
+    .jt-card-sub { font-size: 11px; }
+    .jt-card-desc { display: none; }
+    .jt-period { font-size: 10px; padding-top: 10px; }
+    .jt-col-label { font-size: 9px; }
   }
 
   /* ── Skills ── */

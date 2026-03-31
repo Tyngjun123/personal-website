@@ -45,10 +45,12 @@
   --radius:    8px;
   --radius-lg: 12px;
 
-  /* Gradients */
-  --gradient-text: linear-gradient(135deg, #2563eb 0%, #6366f1 100%);
-  --gradient-bar:  linear-gradient(90deg,  #2563eb 0%, #6366f1 100%);
-  --gradient-line: linear-gradient(90deg, transparent, #2563eb, #6366f1, transparent);
+  /* Gradients — tri-colour system */
+  --gradient:      linear-gradient(135deg, #2563eb 0%, #6366f1 55%, #a855f7 100%);
+  --gradient-bar:  linear-gradient(90deg,  #2563eb 0%, #6366f1 55%, #a855f7 100%);
+  --gradient-line: linear-gradient(90deg, transparent, #6366f1, transparent);
+  --gradient-alt:  linear-gradient(135deg, #06b6d4 0%, #2563eb 50%, #6366f1 100%);
+  --gradient-text: linear-gradient(135deg, #2563eb 0%, #6366f1 55%, #a855f7 100%);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -110,12 +112,53 @@ pre code { background: none; border: none; padding: 0; color: inherit; }
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 @keyframes growBar {
   from { width: 0%; }
 }
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.8); }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(99,102,241,0.25); }
+  50%       { box-shadow: 0 0 0 6px rgba(99,102,241,0.08); }
+}
 
-.anim-1 { animation: fadeUp 0.55s ease both; }
-.anim-2 { animation: fadeUp 0.55s 0.08s ease both; }
-.anim-3 { animation: fadeUp 0.55s 0.16s ease both; }
-.anim-4 { animation: fadeUp 0.55s 0.24s ease both; }
-.anim-5 { animation: fadeUp 0.55s 0.32s ease both; }
+.anim-1 { animation: fadeUp 0.5s 0.05s ease both; }
+.anim-2 { animation: fadeUp 0.5s 0.12s ease both; }
+.anim-3 { animation: fadeUp 0.5s 0.19s ease both; }
+.anim-4 { animation: fadeUp 0.5s 0.26s ease both; }
+.anim-5 { animation: fadeUp 0.5s 0.33s ease both; }
+.anim-photo { animation: fadeIn 0.7s 0.1s ease both; }
+
+/* ── Scroll reveal ── */
+.reveal-section {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal-section.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-item {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.reveal-item.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}

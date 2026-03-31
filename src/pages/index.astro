@@ -668,23 +668,23 @@ const education = SITE.education;
   /* ── TJ's Journey ── */
   .journey-section {
     position: relative; padding: 64px 0; overflow: hidden;
-    background: linear-gradient(135deg, #0a0f1e 0%, #0d1433 45%, #100d24 100%);
+    background: var(--white); border-bottom: 1px solid var(--border);
   }
   .journey-bg { position: absolute; inset: 0; pointer-events: none; }
   .journey-glow { position: absolute; border-radius: 50%; }
   .journey-glow-1 {
     top: -100px; left: 20%; width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%);
   }
   .journey-glow-2 {
     bottom: -80px; right: 10%; width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(168,85,247,0.10) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%);
   }
   .journey-watermark {
     position: absolute; font-family: var(--font-display);
     font-size: clamp(60px, 10vw, 120px); font-weight: 900;
     letter-spacing: -0.04em; text-transform: uppercase;
-    opacity: 0.045; color: #fff; pointer-events: none;
+    opacity: 0.03; color: var(--blue-600); pointer-events: none;
     top: 50%; transform: translateY(-50%); white-space: nowrap;
   }
   .journey-watermark--left { left: -10px; }
@@ -694,12 +694,12 @@ const education = SITE.education;
   .journey-eyebrow {
     font-family: var(--font-mono); font-size: 10px; font-weight: 500;
     letter-spacing: 0.14em; text-transform: uppercase;
-    color: rgba(99,102,241,0.8); margin-bottom: 8px;
+    color: var(--blue-500); margin-bottom: 8px;
   }
   .journey-title {
     font-family: var(--font-display);
     font-size: clamp(1.75rem, 4vw, 2.5rem);
-    font-weight: 800; letter-spacing: -0.03em; color: #fff;
+    font-weight: 800; letter-spacing: -0.03em; color: var(--ink);
   }
   .journey-title span {
     background: var(--gradient);
@@ -718,14 +718,14 @@ const education = SITE.education;
   .journey-line-col { display: flex; justify-content: center; padding-top: 0; }
   .journey-line {
     width: 2px; min-height: 100%;
-    background: linear-gradient(180deg, #2563eb 0%, #6366f1 50%, rgba(99,102,241,0.08) 100%);
+    background: linear-gradient(180deg, var(--blue-500) 0%, #6366f1 50%, rgba(99,102,241,0.1) 100%);
   }
 
   .journey-col { display: flex; flex-direction: column; gap: 20px; }
   .journey-col-label {
     font-family: var(--font-mono); font-size: 10px; font-weight: 600;
     letter-spacing: 0.12em; text-transform: uppercase;
-    color: rgba(255,255,255,0.25); margin-bottom: 4px;
+    color: var(--ink-4); margin-bottom: 4px;
   }
   .journey-col--edu { align-items: flex-end; }
   .journey-col--edu .journey-col-label { text-align: right; }
@@ -740,33 +740,31 @@ const education = SITE.education;
   .journey-dot {
     width: 14px; height: 14px; flex-shrink: 0; border-radius: 50%;
     background: var(--gradient);
-    border: 2px solid #0d1433;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.3), 0 0 12px rgba(99,102,241,0.2);
+    border: 2px solid var(--white);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
     margin-top: 16px; position: relative; z-index: 2;
   }
   .journey-item--current .journey-dot { animation: pulse-ring 2.5s ease-in-out infinite; }
 
   .journey-card {
     flex: 1; padding: 14px 16px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--white);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    transition: border-color 0.2s, background 0.2s;
-    backdrop-filter: blur(4px);
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
   }
   .journey-card:hover {
-    border-color: rgba(99,102,241,0.3);
-    background: rgba(255,255,255,0.07);
+    border-color: var(--blue-200);
+    box-shadow: 0 4px 16px rgba(37,99,235,0.07);
   }
   .journey-item--current .journey-card {
-    border-color: rgba(99,102,241,0.25);
-    background: rgba(37,99,235,0.08);
+    border-color: var(--blue-200); background: var(--blue-50);
   }
   .journey-col--edu .journey-card { margin-right: 10px; text-align: right; }
   .journey-col--work .journey-card { margin-left: 10px; text-align: left; }
 
   .journey-card-school, .journey-card-company {
-    font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 3px;
+    font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 3px;
   }
   .journey-card-degree, .journey-card-role {
     font-size: 12px; font-weight: 600;
@@ -776,18 +774,18 @@ const education = SITE.education;
   }
   .journey-card-period {
     font-family: var(--font-mono); font-size: 10px;
-    color: rgba(255,255,255,0.35); margin-bottom: 8px;
+    color: var(--ink-4); margin-bottom: 8px;
   }
   .journey-card-desc {
-    font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.7; margin-bottom: 10px;
+    font-size: 12px; color: var(--ink-3); line-height: 1.7; margin-bottom: 10px;
   }
   .journey-tags { display: flex; flex-wrap: wrap; gap: 4px; }
   .journey-col--edu .journey-tags { justify-content: flex-end; }
   .journey-tag {
     font-family: var(--font-mono); font-size: 10px;
-    color: rgba(255,255,255,0.45);
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--ink-3);
+    background: var(--bg);
+    border: 1px solid var(--border);
     padding: 2px 7px; border-radius: 20px;
   }
 

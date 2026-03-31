@@ -26,6 +26,20 @@ export const SITE = {
   twitterHandle: settings.twitterHandle,
   locale:        settings.locale,
   themeColor:    settings.themeColor,
+  workExperience: (settings.workExperience ?? []) as Array<{
+    company: string;
+    role: string;
+    period: string;
+    current: boolean;
+    description: string;
+    tags: string[];
+  }>,
+  education: (settings.education ?? []) as Array<{
+    school: string;
+    degree: string;
+    period: string;
+    tags: string[];
+  }>,
 };
 
 // Navigation links

@@ -10,7 +10,6 @@ let settings: any = {};
 
 const SETTINGS_PATH = 'src/data/cms-settings.json';
 
-// Load current settings
 if (configured) {
   try {
     const file = await getFile(SETTINGS_PATH);
@@ -27,6 +26,36 @@ if (Astro.request.method === 'POST' && configured) {
 
     const file = await getFile(SETTINGS_PATH);
     const current = JSON.parse(file.content);
+
+    // Parse work experience array
+    const workCount = parseInt(g('work_count') || '0', 10);
+    const workExperience = [];
+    for (let i = 0; i < workCount; i++) {
+      const company = g(`work_${i}_company`);
+      if (!company) continue;
+      workExperience.push({
+        company,
+        role: g(`work_${i}_role`),
+        period: g(`work_${i}_period`),
+        current: form.get(`work_${i}_current`) === 'on',
+        description: g(`work_${i}_description`),
+        tags: g(`work_${i}_tags`).split(',').map((t: string) => t.trim()).filter(Boolean),
+      });
+    }
+
+    // Parse education array
+    const eduCount = parseInt(g('edu_count') || '0', 10);
+    const education = [];
+    for (let i = 0; i < eduCount; i++) {
+      const school = g(`edu_${i}_school`);
+      if (!school) continue;
+      education.push({
+        school,
+        degree: g(`edu_${i}_degree`),
+        period: g(`edu_${i}_period`),
+        tags: g(`edu_${i}_tags`).split(',').map((t: string) => t.trim()).filter(Boolean),
+      });
+    }
 
     const updated = {
       ...current,
@@ -46,8 +75,11 @@ if (Astro.request.method === 'POST' && configured) {
         twitter:   g('twitter'),
         facebook:  g('facebook'),
         instagram: g('instagram'),
+        tiktok:    g('tiktok'),
         youtube:   g('youtube'),
       },
+      workExperience,
+      education,
     };
 
     await saveFile(SETTINGS_PATH, JSON.stringify(updated, null, 2), file.sha, 'CMS: update site settings');
@@ -59,6 +91,8 @@ if (Astro.request.method === 'POST' && configured) {
 }
 
 const s = settings;
+const workItems: any[] = s.workExperience ?? [];
+const eduItems: any[] = s.education ?? [];
 ---
 
 <AdminLayout title="Home & Social Settings">
@@ -72,6 +106,8 @@ const s = settings;
   {errorMsg   && <div class="alert alert-err">{errorMsg}</div>}
 
   <form method="POST" class="cms-form">
+
+    <!-- ── Homepage basics ── -->
     <section class="form-section">
       <h2 class="form-section-title">Homepage content</h2>
       <div class="fields">
@@ -118,6 +154,88 @@ const s = settings;
       </div>
     </section>
 
+    <!-- ── Work Experience ── -->
+    <section class="form-section">
+      <h2 class="form-section-title">Work Experience <span class="hint">(TJ's Journey — right side)</span></h2>
+      <input type="hidden" id="work_count" name="work_count" value={workItems.length} />
+      <div id="work-container">
+        {workItems.map((job, i) => (
+          <div class="array-item" data-idx={i}>
+            <div class="array-item-header">
+              <span class="array-item-num">#{i + 1}</span>
+              <button type="button" class="btn-remove" onclick="removeArrayItem(this, 'work')">Remove</button>
+            </div>
+            <div class="fields">
+              <div class="field half">
+                <label>Company</label>
+                <input name={`work_${i}_company`} value={job.company ?? ''} placeholder="Company name" />
+              </div>
+              <div class="field half">
+                <label>Role</label>
+                <input name={`work_${i}_role`} value={job.role ?? ''} placeholder="Product Owner · Automation Engineer" />
+              </div>
+              <div class="field half">
+                <label>Period</label>
+                <input name={`work_${i}_period`} value={job.period ?? ''} placeholder="2022 – Present" />
+              </div>
+              <div class="field half field-check">
+                <label>Current role?</label>
+                <label class="check-label">
+                  <input type="checkbox" name={`work_${i}_current`} checked={job.current} />
+                  <span>Yes, this is my current role</span>
+                </label>
+              </div>
+              <div class="field">
+                <label>Description</label>
+                <textarea name={`work_${i}_description`} rows="2">{job.description ?? ''}</textarea>
+              </div>
+              <div class="field">
+                <label>Tags <span class="hint">(comma-separated: n8n, MySQL, Notion)</span></label>
+                <input name={`work_${i}_tags`} value={(job.tags ?? []).join(', ')} placeholder="n8n, MySQL, WhatsApp API" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <button type="button" class="btn-add" onclick="addWorkItem()">+ Add work experience</button>
+    </section>
+
+    <!-- ── Education ── -->
+    <section class="form-section">
+      <h2 class="form-section-title">Education <span class="hint">(TJ's Journey — left side)</span></h2>
+      <input type="hidden" id="edu_count" name="edu_count" value={eduItems.length} />
+      <div id="edu-container">
+        {eduItems.map((edu, i) => (
+          <div class="array-item" data-idx={i}>
+            <div class="array-item-header">
+              <span class="array-item-num">#{i + 1}</span>
+              <button type="button" class="btn-remove" onclick="removeArrayItem(this, 'edu')">Remove</button>
+            </div>
+            <div class="fields">
+              <div class="field half">
+                <label>School / University</label>
+                <input name={`edu_${i}_school`} value={edu.school ?? ''} placeholder="University of Malaya" />
+              </div>
+              <div class="field half">
+                <label>Degree / Programme</label>
+                <input name={`edu_${i}_degree`} value={edu.degree ?? ''} placeholder="BSc Computer Science" />
+              </div>
+              <div class="field half">
+                <label>Period</label>
+                <input name={`edu_${i}_period`} value={edu.period ?? ''} placeholder="2016 – 2020" />
+              </div>
+              <div class="field half">
+                <label>Tags <span class="hint">(comma-separated subjects)</span></label>
+                <input name={`edu_${i}_tags`} value={(edu.tags ?? []).join(', ')} placeholder="Data Structures, Algorithms" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <button type="button" class="btn-add" onclick="addEduItem()">+ Add education</button>
+    </section>
+
+    <!-- ── Social links ── -->
     <section class="form-section">
       <h2 class="form-section-title">Social links</h2>
       <div class="fields">
@@ -127,6 +245,7 @@ const s = settings;
           { name: 'twitter',   label: 'Twitter/X', placeholder: 'https://twitter.com/yourhandle' },
           { name: 'facebook',  label: 'Facebook',  placeholder: 'https://facebook.com/yourpage' },
           { name: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/yourhandle' },
+          { name: 'tiktok',    label: 'TikTok',    placeholder: 'https://tiktok.com/@yourhandle' },
           { name: 'youtube',   label: 'YouTube',   placeholder: 'https://youtube.com/@yourchannel' },
         ].map(f => (
           <div class="field half">
@@ -142,6 +261,89 @@ const s = settings;
     </div>
   </form>
 </AdminLayout>
+
+<script is:inline>
+  // ── Work Experience ──────────────────────────────────
+  function getWorkCount() {
+    return document.querySelectorAll('#work-container .array-item').length;
+  }
+  function updateWorkCount() {
+    document.getElementById('work_count').value = getWorkCount();
+  }
+  function reindexWork() {
+    document.querySelectorAll('#work-container .array-item').forEach(function(item, i) {
+      item.dataset.idx = i;
+      item.querySelector('.array-item-num').textContent = '#' + (i + 1);
+      item.querySelectorAll('[name]').forEach(function(input) {
+        input.name = input.name.replace(/work_\d+_/, 'work_' + i + '_');
+      });
+    });
+    updateWorkCount();
+  }
+  function addWorkItem() {
+    var idx = getWorkCount();
+    var container = document.getElementById('work-container');
+    var div = document.createElement('div');
+    div.className = 'array-item';
+    div.dataset.idx = idx;
+    div.innerHTML =
+      '<div class="array-item-header"><span class="array-item-num">#' + (idx + 1) + '</span>' +
+      '<button type="button" class="btn-remove" onclick="removeArrayItem(this,\'work\')">Remove</button></div>' +
+      '<div class="fields">' +
+        '<div class="field half"><label>Company</label><input name="work_' + idx + '_company" placeholder="Company name" /></div>' +
+        '<div class="field half"><label>Role</label><input name="work_' + idx + '_role" placeholder="Product Owner" /></div>' +
+        '<div class="field half"><label>Period</label><input name="work_' + idx + '_period" placeholder="2022 – Present" /></div>' +
+        '<div class="field half field-check"><label>Current role?</label><label class="check-label"><input type="checkbox" name="work_' + idx + '_current" /><span>Yes, this is my current role</span></label></div>' +
+        '<div class="field"><label>Description</label><textarea name="work_' + idx + '_description" rows="2"></textarea></div>' +
+        '<div class="field"><label>Tags <span class="hint">(comma-separated)</span></label><input name="work_' + idx + '_tags" placeholder="n8n, MySQL" /></div>' +
+      '</div>';
+    container.appendChild(div);
+    updateWorkCount();
+  }
+
+  // ── Education ──────────────────────────────────────
+  function getEduCount() {
+    return document.querySelectorAll('#edu-container .array-item').length;
+  }
+  function updateEduCount() {
+    document.getElementById('edu_count').value = getEduCount();
+  }
+  function reindexEdu() {
+    document.querySelectorAll('#edu-container .array-item').forEach(function(item, i) {
+      item.dataset.idx = i;
+      item.querySelector('.array-item-num').textContent = '#' + (i + 1);
+      item.querySelectorAll('[name]').forEach(function(input) {
+        input.name = input.name.replace(/edu_\d+_/, 'edu_' + i + '_');
+      });
+    });
+    updateEduCount();
+  }
+  function addEduItem() {
+    var idx = getEduCount();
+    var container = document.getElementById('edu-container');
+    var div = document.createElement('div');
+    div.className = 'array-item';
+    div.dataset.idx = idx;
+    div.innerHTML =
+      '<div class="array-item-header"><span class="array-item-num">#' + (idx + 1) + '</span>' +
+      '<button type="button" class="btn-remove" onclick="removeArrayItem(this,\'edu\')">Remove</button></div>' +
+      '<div class="fields">' +
+        '<div class="field half"><label>School / University</label><input name="edu_' + idx + '_school" placeholder="University name" /></div>' +
+        '<div class="field half"><label>Degree / Programme</label><input name="edu_' + idx + '_degree" placeholder="BSc Computer Science" /></div>' +
+        '<div class="field half"><label>Period</label><input name="edu_' + idx + '_period" placeholder="2016 – 2020" /></div>' +
+        '<div class="field half"><label>Tags</label><input name="edu_' + idx + '_tags" placeholder="Data Structures, Algorithms" /></div>' +
+      '</div>';
+    container.appendChild(div);
+    updateEduCount();
+  }
+
+  // ── Shared remove ──────────────────────────────────
+  function removeArrayItem(btn, type) {
+    btn.closest('.array-item').remove();
+    if (type === 'work') reindexWork();
+    else reindexEdu();
+  }
+</script>
 
 <style>
   .notice {
@@ -162,12 +364,18 @@ const s = settings;
   .form-section-title { font-size: 0.82rem; font-weight: 500; color: #9ca3af; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.06em; }
 
   .fields { display: flex; flex-wrap: wrap; gap: 1rem; }
-
   .field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 100%; }
   .field.half { flex: 1 1 calc(50% - 0.5rem); min-width: 200px; }
+  .field-check { justify-content: flex-end; }
 
   label { font-size: 0.78rem; color: #6b7280; }
   .hint { color: #374151; font-size: 0.72rem; }
+
+  .check-label {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    font-size: 0.82rem; color: #9ca3af;
+  }
+  .check-label input[type="checkbox"] { width: 14px; height: 14px; accent-color: #6366f1; }
 
   input, textarea {
     background: #111; border: 1px solid #2d2d2d; border-radius: 6px;
@@ -176,6 +384,31 @@ const s = settings;
   }
   textarea { resize: vertical; line-height: 1.6; }
   input:focus, textarea:focus { border-color: #4b5563; }
+
+  /* Array items */
+  .array-item {
+    background: #141414; border: 1px solid #222;
+    border-radius: 6px; padding: 1rem; margin-bottom: 0.75rem;
+  }
+  .array-item:last-child { margin-bottom: 0; }
+  .array-item-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 0.875rem;
+  }
+  .array-item-num { font-size: 0.72rem; color: #4b5563; font-weight: 500; }
+  .btn-remove {
+    font-size: 0.72rem; color: #ef4444; background: transparent;
+    border: 1px solid #3f1e1e; border-radius: 4px; padding: 2px 8px;
+    cursor: pointer; font-family: inherit; transition: background 0.15s;
+  }
+  .btn-remove:hover { background: #1f0a0a; }
+  .btn-add {
+    margin-top: 0.75rem; font-size: 0.8rem; color: #6366f1;
+    background: transparent; border: 1px dashed #2d2d7a;
+    border-radius: 6px; padding: 0.5rem 1rem; cursor: pointer;
+    font-family: inherit; width: 100%; transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-add:hover { background: rgba(99,102,241,0.06); border-color: #4444aa; }
 
   .form-actions { display: flex; justify-content: flex-end; }
   .btn-save {

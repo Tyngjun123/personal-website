@@ -17,6 +17,13 @@ const latestArticles = allArticles
 
 const workExperience = SITE.workExperience;
 const education = SITE.education;
+
+// Merge + sort newest→oldest by the first 4-digit year in `period`
+const getYear = (period: string) => parseInt(period.match(/\d{4}/)?.[0] ?? '0', 10);
+const allJourneyItems = [
+  ...workExperience.map((job: any) => ({ ...job, side: 'work' })),
+  ...education.map((edu: any)     => ({ ...edu, side: 'edu'  })),
+].sort((a: any, b: any) => getYear(b.period) - getYear(a.period));
 ---
 
 <BaseLayout title={SITE.title} description={SITE.description}>
@@ -132,43 +139,47 @@ const education = SITE.education;
         <div class="jt-cell jt-cell--center"></div>
         <div class="jt-cell jt-cell--right"><span class="jt-col-label">Work Experience</span></div>
 
-        <!-- Education items: card LEFT · dot CENTER · date RIGHT -->
-        {education.map((edu, i) => (
+        <!-- All items merged & sorted newest→oldest: edu=LEFT, work=RIGHT -->
+        {(allJourneyItems as any[]).map((item, i) => (
           <>
+            {/* LEFT cell: edu card -or- work date */}
             <div class="jt-cell jt-cell--left reveal-item" style={`transition-delay: ${i * 0.1}s`}>
-              <div class="jt-card">
-                <div class="jt-card-name">{edu.school}</div>
-                <div class="jt-card-sub">{edu.degree}</div>
-                {edu.tags && edu.tags.length > 0 && (
-                  <div class="jt-tags">
-                    {edu.tags.map((t: string) => <span class="jt-tag">{t}</span>)}
-                  </div>
-                )}
-              </div>
+              {item.side === 'edu' ? (
+                <div class="jt-card">
+                  <div class="jt-card-name">{item.school}</div>
+                  <div class="jt-card-sub">{item.degree}</div>
+                  {item.tags && item.tags.length > 0 && (
+                    <div class="jt-tags">
+                      {item.tags.map((t: string) => <span class="jt-tag">{t}</span>)}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <span class="jt-period jt-period--right">{item.period}</span>
+              )}
             </div>
-            <div class="jt-cell jt-cell--center"><div class="jt-dot"></div></div>
-            <div class="jt-cell jt-cell--right"><span class="jt-period">{edu.period}</span></div>
-          </>
-        ))}
 
-        <!-- Work items: date LEFT · dot CENTER · card RIGHT -->
-        {workExperience.map((job, i) => (
-          <>
-            <div class="jt-cell jt-cell--left"><span class="jt-period jt-period--right">{job.period}</span></div>
+            {/* CENTER: dot on the line */}
             <div class="jt-cell jt-cell--center">
-              <div class:list={['jt-dot', { 'jt-dot--current': job.current }]}></div>
+              <div class:list={['jt-dot', { 'jt-dot--current': item.side === 'work' && item.current }]}></div>
             </div>
+
+            {/* RIGHT cell: work card -or- edu date */}
             <div class="jt-cell jt-cell--right reveal-item" style={`transition-delay: ${i * 0.1}s`}>
-              <div class:list={['jt-card', { 'jt-card--current': job.current }]}>
-                <div class="jt-card-name">{job.company}</div>
-                <div class="jt-card-sub">{job.role}</div>
-                {job.description && <p class="jt-card-desc">{job.description}</p>}
-                {job.tags && job.tags.length > 0 && (
-                  <div class="jt-tags">
-                    {job.tags.map((t: string) => <span class="jt-tag">{t}</span>)}
-                  </div>
-                )}
-              </div>
+              {item.side === 'work' ? (
+                <div class:list={['jt-card', { 'jt-card--current': item.current }]}>
+                  <div class="jt-card-name">{item.company}</div>
+                  <div class="jt-card-sub">{item.role}</div>
+                  {item.description && <p class="jt-card-desc">{item.description}</p>}
+                  {item.tags && item.tags.length > 0 && (
+                    <div class="jt-tags">
+                      {item.tags.map((t: string) => <span class="jt-tag">{t}</span>)}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <span class="jt-period">{item.period}</span>
+              )}
             </div>
           </>
         ))}

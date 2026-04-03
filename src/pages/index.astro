@@ -104,15 +104,23 @@ const allJourneyItems = [
     </div>
   </section>
 
-  <!-- ══ METRICS BAR ══ -->
-  <div class="metrics-bar">
-    <span class="metrics-live">Live</span>
-    <div class="metrics-items">
-      <span class="m-item"><span class="m-key">workflows</span><span class="m-val">24 active</span></span>
-      <span class="m-item"><span class="m-key">leads today</span><span class="m-val">47</span></span>
-      <span class="m-item"><span class="m-key">api calls</span><span class="m-val">12.4K / week</span></span>
-      <span class="m-item"><span class="m-key">hours saved</span><span class="m-val">320h</span></span>
-      <span class="m-item"><span class="m-key">uptime</span><span class="m-val">99.97%</span></span>
+  <!-- ══ MARQUEE TICKER ══ -->
+  <div class="ticker-wrap" aria-hidden="true">
+    <div class="ticker-track">
+      {[0, 1].map(() => (
+        <div class="ticker-set">
+          <span class="ticker-item"><span class="ticker-dot"></span>Product Owner</span>
+          <span class="ticker-item"><span class="ticker-dot"></span>n8n Automation</span>
+          <span class="ticker-item"><span class="ticker-dot"></span>API Integration</span>
+          <span class="ticker-item"><span class="ticker-dot"></span>WhatsApp &amp; Telegram Bots</span>
+          <span class="ticker-item"><span class="ticker-dot"></span>MySQL &amp; Databases</span>
+          <span class="ticker-item"><span class="ticker-dot"></span>Workflow Architecture</span>
+          <span class="ticker-item"><span class="ticker-dot"></span>iGaming Tech Lead</span>
+          <span class="ticker-item"><span class="ticker-dot"></span>SEO Automation</span>
+          <span class="ticker-item"><span class="ticker-dot"></span>Notion Systems</span>
+          <span class="ticker-item"><span class="ticker-dot"></span>Process Elimination</span>
+        </div>
+      ))}
     </div>
   </div>
 
@@ -656,15 +664,49 @@ const allJourneyItems = [
   }
 
   /* ── Metrics Bar ── */
-  .metrics-bar {
-    background: var(--blue-600); padding: 10px 32px;
-    display: flex; align-items: center; overflow: hidden;
+  /* ── Marquee Ticker ── */
+  @keyframes ticker-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
   }
-  .metrics-live { font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-right: 28px; flex-shrink: 0; }
-  .metrics-items { display: flex; gap: 32px; flex-wrap: wrap; }
-  .m-item { display: flex; gap: 8px; align-items: center; }
-  .m-key { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.55); }
-  .m-val { font-family: var(--font-mono); font-size: 10px; font-weight: 500; color: #fff; }
+  .ticker-wrap {
+    overflow: hidden;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 0;
+  }
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    animation: ticker-scroll 28s linear infinite;
+  }
+  .ticker-wrap:hover .ticker-track { animation-play-state: paused; }
+  .ticker-set {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-3);
+    padding: 0 28px;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: color 0.15s;
+  }
+  .ticker-item:hover { color: var(--blue-600); }
+  .ticker-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--gradient);
+    flex-shrink: 0;
+  }
 
   /* ── Section commons ── */
   .section-header { margin-bottom: 28px; }
@@ -906,8 +948,7 @@ const allJourneyItems = [
   /* ── Responsive ── */
   @media (max-width: 640px) {
     .projects-grid { grid-template-columns: 1fr; }
-    .metrics-bar { padding: 10px 16px; }
-    .metrics-items { gap: 16px; }
+    .ticker-item { padding: 0 18px; font-size: 10px; }
     .section-header--row { flex-direction: column; align-items: flex-start; gap: 8px; }
     .timeline-card:hover { transform: none; }
   }

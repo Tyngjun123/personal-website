@@ -115,7 +115,6 @@ const allJourneyItems = [
           <span class="ticker-item"><span class="ticker-dot"></span>WhatsApp &amp; Telegram Bots</span>
           <span class="ticker-item"><span class="ticker-dot"></span>MySQL &amp; Databases</span>
           <span class="ticker-item"><span class="ticker-dot"></span>Workflow Architecture</span>
-          <span class="ticker-item"><span class="ticker-dot"></span>iGaming Tech Lead</span>
           <span class="ticker-item"><span class="ticker-dot"></span>SEO Automation</span>
           <span class="ticker-item"><span class="ticker-dot"></span>Notion Systems</span>
           <span class="ticker-item"><span class="ticker-dot"></span>Process Elimination</span>
@@ -205,17 +204,17 @@ const allJourneyItems = [
       </div>
       <div class="skills-about-grid">
         <div class="about-text">
-          <p>Product Owner at an iGaming platform in Malaysia. I don't manage backlogs — I eliminate entire categories of work by automating them out of existence.</p>
-          <p>My tools of choice are n8n, MySQL, and a growing stack of APIs. I care about solutions that are practical, cost-effective, and actually get used.</p>
+          <p>Product Owner in Malaysia. I don't manage backlogs — I eliminate entire categories of work by automating them out of existence.</p>
+          <p>My tools of choice are n8n, MySQL, Notion, and a growing stack of APIs. I care about solutions that are practical, cost-effective, and actually get used.</p>
         </div>
         <div class="skills-grid">
           {[
             { name: 'n8n / Automation',    pct: 92 },
-            { name: 'API Integration',     pct: 88 },
-            { name: 'MySQL / Database',    pct: 82 },
-            { name: 'WhatsApp + Telegram', pct: 78 },
-            { name: 'SEO Automation',      pct: 72 },
-            { name: 'Notion Systems',      pct: 90 },
+            { name: 'Website Development',     pct: 88 },
+            { name: 'CRM System Development',    pct: 82 },
+            { name: 'WhatsApp + Telegram Bots Messaging', pct: 78 },
+            { name: 'SEO',      pct: 72 },
+            { name: 'Notion',      pct: 90 },
           ].map(s => (
             <div class="skill-row">
               <div class="skill-head">
@@ -265,7 +264,7 @@ const allJourneyItems = [
             {[
               { tag: 'Automation', title: 'Lead management & multi-channel notification system', desc: 'Zero-touch pipeline from form submission to WhatsApp, Telegram, and Email in under 60 seconds.', stack: ['n8n', 'MySQL', 'WhatsApp API', 'Notion'], result: '↓ 80% reduction in manual effort', featured: true },
               { tag: 'SEO × AI',   title: 'SEO keyword research automation pipeline',           desc: 'Scrapes Google Autocomplete + Reddit → Gemini generates full articles in under 5 minutes.', stack: ['n8n', 'Gemini API', 'Google Sheets'], result: '↓ Full article pipeline in < 5 min', featured: true },
-              { tag: 'Platform',  title: 'Telegram bot promotion system',                       desc: 'Automated weekly bonus campaigns with smart rate limiting for iGaming members.', stack: ['Telegram API', 'Node.js', 'MySQL'], result: null, featured: false },
+              { tag: 'Platform',  title: 'Telegram bot promotion system',                       desc: 'Automated weekly bonus campaigns with smart rate limiting for platform members.', stack: ['Telegram API', 'Node.js', 'MySQL'], result: null, featured: false },
               { tag: 'Tracking',  title: 'Wealth management tracker in Notion',                 desc: 'Portfolio dashboard with live charts and automated data sync via n8n workflows.', stack: ['Notion API', 'n8n', 'Charts'], result: null, featured: false },
             ].map((p, i) => (
               <div class:list={['proj-card', { 'proj-featured': p.featured }]}>
@@ -357,7 +356,6 @@ const allJourneyItems = [
     'n8n Automation Engineer',
     'API Integration Specialist',
     'Workflow Architect',
-    'iGaming Tech Lead',
   ];
   var rIdx = 0, cIdx = 0, deleting = false;
   var twEl = document.getElementById('typewriter-text');

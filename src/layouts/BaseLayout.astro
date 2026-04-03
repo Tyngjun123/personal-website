@@ -37,7 +37,16 @@ const props = Astro.props;
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="sitemap" href="/sitemap.xml" />
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5XJNXQS3VX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-5XJNXQS3VX');
+    </script>
 
     <!-- SEO component handles all meta, OG, JSON-LD -->
     <SEO {...props} />

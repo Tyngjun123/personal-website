@@ -1,11 +1,13 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import vercel from '@astrojs/vercel/serverless';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://yourdomain.com', // 🔁 Replace with your actual domain after Vercel deploy
+  site: 'https://tj-portfolio-coral.vercel.app',
   integrations: [
     mdx(),
+    sitemap(),
   ],
   adapter: vercel({
     webAnalytics: { enabled: true }, // Free Vercel analytics

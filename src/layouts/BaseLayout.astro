@@ -68,6 +68,113 @@ const props = Astro.props;
     <Footer />
     <Modal />
     <SpeedInsights />
+
+    <!-- ── Back to top (desktop only) ── -->
+    <button id="back-to-top" aria-label="Back to top">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="18 15 12 9 6 15"/>
+      </svg>
+    </button>
+
+    <!-- ── Mobile bottom nav ── -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+      <a href="/" class:list={['mbn-item', { 'mbn-active': Astro.url.pathname === '/' }]}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9,22 9,12 15,12 15,22"/>
+        </svg>
+        <span>Home</span>
+      </a>
+      <a href="/projects" class:list={['mbn-item', { 'mbn-active': Astro.url.pathname.startsWith('/projects') }]}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        <span>Projects</span>
+      </a>
+      <a href="/articles" class:list={['mbn-item', { 'mbn-active': Astro.url.pathname.startsWith('/articles') }]}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14,2 14,8 20,8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        <span>Articles</span>
+      </a>
+      <a href="/certificates" class:list={['mbn-item', { 'mbn-active': Astro.url.pathname.startsWith('/certificates') }]}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        <span>Certs</span>
+      </a>
+    </nav>
+
   </body>
 </html>
+
+<script is:inline>
+  // Back to top
+  var btn = document.getElementById('back-to-top');
+  window.addEventListener('scroll', function() {
+    if (btn) btn.classList.toggle('visible', window.scrollY > 300);
+  });
+  btn && btn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+
+<style>
+  /* ── Back to top (desktop only) ── */
+  #back-to-top {
+    display: none;
+    position: fixed; bottom: 32px; right: 32px; z-index: 90;
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--gradient);
+    color: #fff; border: none; cursor: pointer;
+    align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.2s;
+  }
+  #back-to-top.visible { opacity: 1; transform: translateY(0); }
+  #back-to-top:hover { box-shadow: 0 6px 24px rgba(99,102,241,0.45); transform: translateY(-2px); }
+  @media (min-width: 769px) {
+    #back-to-top { display: flex; }
+  }
+
+  /* ── Mobile bottom nav ── */
+  .mobile-bottom-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+    justify-content: space-around; align-items: center;
+  }
+  @media (max-width: 768px) {
+    .mobile-bottom-nav { display: flex; }
+    body { padding-bottom: 68px; }
+  }
+  .mbn-item {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 500; color: var(--ink-4);
+    text-decoration: none; padding: 4px 16px;
+    transition: color 0.15s;
+    position: relative;
+  }
+  .mbn-item svg { transition: stroke 0.15s; }
+  .mbn-item:hover { color: var(--blue-600); }
+  .mbn-item:hover svg { stroke: var(--blue-600); }
+  .mbn-active { color: var(--blue-600); }
+  .mbn-active svg { stroke: var(--blue-600); }
+  .mbn-active::before {
+    content: '';
+    position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+    width: 28px; height: 3px; border-radius: 0 0 4px 4px;
+    background: var(--gradient);
+  }
+</style>
 

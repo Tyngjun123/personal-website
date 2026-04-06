@@ -1,0 +1,145 @@
+---
+title: "The Freelancer's CRM: Build It Free in Notion in Under 2 Hours"
+description: "A step-by-step guide to building a lightweight CRM in Notion specifically designed for freelancers — client tracking, project pipeline, invoicing, and follow-ups."
+publishedDate: "2026-04-06"
+category: "Productivity"
+tags: ["Notion", "CRM", "Freelancers", "Free Tools", "Productivity"]
+readTime: "7 min"
+toc: true
+draft: true
+featured: false
+keywords: ["notion crm for freelancers", "freelancer crm free", "notion for freelancers", "client management notion"]
+---
+
+As a freelancer, you don't need Salesforce. You need something that tracks who you're talking to, where each project stands, and when to follow up — without costing you money every month.
+
+Notion does all of this for free. Here's how to build it in under 2 hours.
+
+## What freelancers actually need from a CRM
+
+Forget enterprise features. Freelancers need:
+- A list of current and potential clients
+- Status tracking (lead → proposal → active → completed)
+- Project and invoice tracking per client
+- Follow-up reminders so leads don't go cold
+- Notes from calls and meetings
+
+That's it. Let's build it.
+
+## Database 1: Clients
+
+Create a database called **Clients** with these properties:
+
+| Property | Type | Options |
+|---|---|---|
+| Name | Title | — |
+| Status | Select | Lead, Prospect, Active, Completed, Paused |
+| Type | Select | One-time, Retainer, Project |
+| Industry | Select | Tech, Retail, F&B, Healthcare, Other |
+| Contact Email | Email | — |
+| Contact Phone | Phone | — |
+| Monthly Value | Number | In RM |
+| Start Date | Date | — |
+| Next Follow-up | Date | — |
+| Referred By | Text | — |
+| Notes | Text | Quick summary |
+
+**Views to create:**
+- **All Clients** — default table view
+- **Active** — filter: Status = Active
+- **Follow Up Today** — filter: Next Follow-up ≤ today
+- **Pipeline** — Board view grouped by Status
+
+## Database 2: Projects
+
+Create a database called **Projects** with these properties:
+
+| Property | Type | Options |
+|---|---|---|
+| Project Name | Title | — |
+| Client | Relation | → Clients |
+| Status | Select | Scoping, In Progress, Review, Delivered, Invoiced, Paid |
+| Deadline | Date | — |
+| Value | Number | Project fee in RM |
+| Invoice Sent | Checkbox | — |
+| Paid | Checkbox | — |
+| Notes | Text | — |
+
+**Views to create:**
+- **Active Projects** — filter: Status = In Progress or Review
+- **Awaiting Payment** — filter: Invoice Sent = true AND Paid = false
+- **This Month** — filter: Deadline is this month
+
+## Database 3: Interactions (optional but valuable)
+
+For clients you have regular calls or meetings with:
+
+| Property | Type |
+|---|---|
+| Date | Date |
+| Client | Relation → Clients |
+| Type | Select: Call, Email, Meeting, Proposal |
+| Summary | Text |
+| Next Action | Text |
+
+This gives you a history of every touchpoint with every client — invaluable when a client says "we spoke about X last quarter."
+
+## Linking it all together
+
+In your **Clients** database, add Rollup properties:
+- **Total Project Value** — Rollup from Projects → Sum of Value
+- **Active Projects Count** — Rollup from Projects → Count filtered by Status = In Progress
+- **Unpaid Invoices** — Rollup from Projects → Count filtered by Invoice Sent AND NOT Paid
+
+Now each client card shows their total value and outstanding invoices at a glance.
+
+## Your daily workflow with this system
+
+**Morning (5 minutes):**
+1. Open "Follow Up Today" view
+2. Contact anyone on the list
+3. Update their Next Follow-up date
+
+**Weekly (15 minutes):**
+1. Review "Awaiting Payment" — chase any overdue invoices
+2. Review pipeline board — any leads going cold?
+3. Update project statuses
+
+**Monthly (30 minutes):**
+1. Review total revenue from Projects database
+2. Identify which client types bring the most value
+3. Plan next month's outreach
+
+## Automating it with n8n
+
+Once your Notion CRM is set up, you can add automation:
+
+**Follow-up reminder via WhatsApp**
+n8n runs daily → checks Notion for contacts with Next Follow-up = today → sends you a WhatsApp message with the client name and notes.
+
+**New enquiry auto-logged**
+Website contact form → n8n → creates new Client record in Notion with Status = Lead.
+
+**Invoice overdue alert**
+n8n checks daily → finds projects with Invoice Sent = true, Paid = false, Deadline > 14 days ago → sends Telegram alert.
+
+## What this costs
+
+The Notion free plan covers everything described here. The only cost is the 2 hours to set it up.
+
+Compare that to:
+- HubSpot Starter: $20/month
+- Pipedrive: $15/user/month
+- Dubsado: $20/month
+
+For a freelancer managing 10–30 clients, this Notion setup does the same job for free.
+
+## Getting started
+
+1. Create a new Notion page called "Business Hub"
+2. Add the three databases above
+3. Import your existing contacts (Notion supports CSV import)
+4. Set up the views described
+5. Add your current active projects
+
+You'll have a functional freelancer CRM before lunch.

@@ -1,0 +1,113 @@
+---
+title: "5 Real n8n Automation Examples You Can Copy Today"
+description: "Practical n8n workflow examples built for real business operations — lead management, notifications, reporting, and more. Copy these and adapt them."
+publishedDate: "2026-04-06"
+category: "Automation"
+tags: ["n8n", "Automation", "Workflow", "Examples", "Tutorial"]
+readTime: "8 min"
+toc: true
+draft: true
+featured: true
+keywords: ["n8n automation examples", "n8n workflow examples", "n8n tutorial", "n8n use cases"]
+---
+
+The best way to learn n8n is to see real workflows, not toy examples. Here are 5 workflows I've actually built and run in production.
+
+## 1. Lead capture → WhatsApp notification in 60 seconds
+
+**The problem:** Leads from website forms sat unread for hours. By the time someone responded, the prospect had already moved on.
+
+**The workflow:**
+1. Webhook trigger — receives form submission
+2. Set node — formats the lead data cleanly
+3. MySQL node — saves lead to database
+4. HTTP Request node — sends WhatsApp message via API
+5. Telegram node — notifies sales team instantly
+
+**Result:** Response time dropped from 2–4 hours to under 60 seconds. Lead conversion improved noticeably within the first week.
+
+**Key n8n nodes used:** Webhook, Set, MySQL, HTTP Request, Telegram
+
+---
+
+## 2. Automated weekly performance report
+
+**The problem:** Every Monday morning, someone spent 90 minutes pulling numbers from different systems and formatting a report for management.
+
+**The workflow:**
+1. Schedule trigger — runs every Monday at 8am
+2. MySQL node — pulls last week's sales data
+3. MySQL node — pulls last week's lead count
+4. Code node — calculates conversion rate and week-on-week change
+5. Gmail node — sends formatted HTML report to management
+
+**Result:** 90 minutes of manual work eliminated. Report now arrives before anyone starts their day.
+
+**Key n8n nodes used:** Schedule Trigger, MySQL (×2), Code, Gmail
+
+---
+
+## 3. Multi-channel lead deduplication
+
+**The problem:** The same customer would enquire via website, WhatsApp, and Facebook — creating three separate records in the CRM. Sales team would call the same person three times.
+
+**The workflow:**
+1. Multiple webhook triggers — one per channel
+2. MySQL node — checks if phone number already exists
+3. IF node — routes new leads vs duplicates differently
+4. MySQL node — creates new record OR updates existing
+5. Telegram node — notifies team with context (new vs returning)
+
+**Result:** Duplicate records dropped to near zero. Team stopped accidentally double-contacting prospects.
+
+**Key n8n nodes used:** Webhook, MySQL, IF, Telegram
+
+---
+
+## 4. Promotion campaign scheduler
+
+**The problem:** Running weekly promotions required someone to manually send messages to thousands of members at a specific time. Delays were common, errors happened.
+
+**The workflow:**
+1. Schedule trigger — runs at campaign start time
+2. MySQL node — fetches eligible member list with filters
+3. SplitInBatches node — processes in batches of 100
+4. HTTP Request node — sends personalised message via API
+5. MySQL node — logs delivery status per member
+6. IF node — flags failed deliveries for retry
+
+**Result:** Campaigns go out on time, every time. Delivery logs allow easy troubleshooting.
+
+**Key n8n nodes used:** Schedule Trigger, MySQL, SplitInBatches, HTTP Request, IF
+
+---
+
+## 5. New member onboarding sequence
+
+**The problem:** New members signed up but received inconsistent onboarding. Some got welcome messages, some didn't. Follow-ups were forgotten.
+
+**The workflow:**
+1. Webhook trigger — fires when new member record is created
+2. Wait node — 5 minute delay (let signup complete)
+3. HTTP Request node — sends welcome WhatsApp message
+4. Wait node — 24 hour delay
+5. HTTP Request node — sends "getting started" tips message
+6. Wait node — 7 day delay
+7. HTTP Request node — sends check-in message with support offer
+
+**Result:** Every new member gets the same quality onboarding experience. Support requests from new members dropped because they were proactively given the information they needed.
+
+**Key n8n nodes used:** Webhook, Wait (×3), HTTP Request (×3)
+
+---
+
+## How to use these as a starting point
+
+You don't need to copy these exactly. Use them as a template:
+
+1. Identify which problem maps closest to yours
+2. Adjust the trigger to match your system
+3. Replace the database/API nodes with your own tools
+4. Start simple — you can always add complexity later
+
+The most important thing is to run your first workflow. Everything else is iteration.

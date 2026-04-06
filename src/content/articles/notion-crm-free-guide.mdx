@@ -1,0 +1,127 @@
+---
+title: "How to Build a Free CRM in Notion (Step-by-Step)"
+description: "A complete guide to building a fully functional CRM in Notion for free — contact management, deal tracking, follow-up reminders, and automation."
+publishedDate: "2026-04-06"
+category: "Productivity"
+tags: ["Notion", "CRM", "Free", "Business Tools", "Productivity"]
+readTime: "8 min"
+toc: true
+draft: true
+featured: true
+keywords: ["notion crm", "notion crm free", "build crm notion", "notion as crm", "notion for crm"]
+---
+
+Most CRM software is expensive, complicated, and filled with features you'll never use. Notion gives you everything you actually need — for free.
+
+Here's how to build a CRM in Notion that handles contacts, deals, follow-ups, and pipeline tracking — without paying for Salesforce.
+
+## What you can build in Notion for free
+
+- Contact database with full history
+- Deal pipeline with stages (Kanban view)
+- Activity log per contact
+- Follow-up reminders
+- Company profiles linked to contacts
+- Email templates stored and accessible
+- Revenue tracking per deal
+
+This covers 90% of what a small business or freelancer needs from a CRM.
+
+## Setting up your Notion CRM
+
+### Step 1 — Create your Contacts database
+
+Create a new database and add these properties:
+
+| Property | Type | Purpose |
+|---|---|---|
+| Name | Title | Contact's full name |
+| Company | Text | Their organisation |
+| Email | Email | Primary email |
+| Phone | Phone | WhatsApp / mobile |
+| Status | Select | Lead / Prospect / Client / Inactive |
+| Source | Select | Website / Referral / Social / Event |
+| Owner | Person | Who manages this contact |
+| Last Contact | Date | When you last spoke |
+| Next Follow-up | Date | When to reach out again |
+| Notes | Text | Quick summary |
+
+### Step 2 — Create your Deals database
+
+| Property | Type | Purpose |
+|---|---|---|
+| Deal Name | Title | e.g. "Company A — Automation Project" |
+| Contact | Relation | Link to Contacts database |
+| Stage | Select | Discovery / Proposal / Negotiation / Won / Lost |
+| Value | Number | Deal value in RM |
+| Close Date | Date | Expected or actual close |
+| Probability | Number | % chance of closing |
+| Notes | Text | Deal context |
+
+### Step 3 — Link them together
+
+In your Deals database, add a **Relation** property pointing to Contacts. In your Contacts database, add a **Rollup** to show all deals linked to each contact.
+
+Now every contact shows their associated deals, and every deal links back to the contact.
+
+### Step 4 — Build your pipeline view
+
+In the Deals database, switch to **Board view** and group by **Stage**. You now have a visual Kanban pipeline showing all deals by stage.
+
+Add filters:
+- Active deals only (exclude Won and Lost)
+- Sort by Close Date ascending
+
+### Step 5 — Set up follow-up tracking
+
+In the Contacts database, create a filtered view called "Needs Follow-up":
+- Filter: Next Follow-up is on or before today
+- Sort: Next Follow-up ascending
+
+Open this view each morning. Every contact that needs attention is right there.
+
+## Making it more powerful with automation
+
+Notion alone handles the structure. Combine it with n8n to add automation:
+
+**Auto-log new leads**
+When a form is submitted on your website → n8n creates a new Contact record in Notion automatically.
+
+**Follow-up reminders via WhatsApp**
+n8n checks daily for contacts with Next Follow-up = today → sends you a WhatsApp reminder with the contact's name and notes.
+
+**Deal won notification**
+When a deal stage changes to "Won" → n8n sends a Telegram message to your team with the deal value.
+
+## Notion CRM vs paid CRM software
+
+| Feature | Notion (Free) | HubSpot Free | Salesforce |
+|---|---|---|---|
+| Contact management | ✅ | ✅ | ✅ |
+| Deal pipeline | ✅ | ✅ | ✅ |
+| Custom fields | ✅ Unlimited | Limited | ✅ |
+| Automation | Via n8n | Limited | Paid add-on |
+| Cost | Free | Free (limited) | $25+/user/mo |
+| Flexibility | Very high | Medium | High |
+| Learning curve | Medium | Low | High |
+
+For a small business or freelancer, Notion + n8n beats every paid CRM at their price point.
+
+## Who this works best for
+
+This setup is ideal for:
+- Freelancers managing 10–50 active clients
+- Small agencies tracking project pipelines
+- Consultants with relationship-heavy businesses
+- Startups that want flexibility without lock-in
+
+If you're managing more than 200 active deals simultaneously, you'll start feeling Notion's limitations. But most businesses never reach that scale.
+
+## Getting started today
+
+1. Duplicate the structure above into your Notion workspace
+2. Add your existing contacts manually (or import from CSV)
+3. Set up your pipeline stages to match your sales process
+4. Open the "Needs Follow-up" view every morning
+
+You'll have a functional CRM running within a few hours. No monthly subscription required.

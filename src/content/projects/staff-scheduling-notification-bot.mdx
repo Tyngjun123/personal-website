@@ -1,0 +1,30 @@
+---
+title: "Staff Scheduling & Notification Automation Bot"
+description: "Automated staff scheduling system that reads rosters from Notion, sends personalised shift reminders via Telegram, and handles leave request workflows."
+summary: "A professional services firm with shift-based staff was managing scheduling in spreadsheets and sending manual WhatsApp reminders for every shift. Built an n8n + Notion + Telegram system that reads the weekly roster, sends personalised shift reminders 24 hours and 2 hours before each shift, handles leave request submissions, and notifies managers of coverage gaps automatically."
+category: "Automation"
+tags: ["n8n", "Notion", "Telegram Bot", "MySQL", "Scheduling", "HR Automation"]
+year: 2025
+role: "Automation Engineer"
+status: "Live"
+type: "Client Project"
+featured: false
+draft: true
+metrics:
+  - { value: "2hrs", label: "Admin saved daily" }
+  - { value: "100%", label: "Shift reminder coverage" }
+  - { value: "0", label: "Missed shift notifications" }
+links:
+  github: ""
+  demo: ""
+problem: "A professional services business with 25 part-time staff was managing weekly rosters in a shared Excel file. An admin staff member spent 2 hours every day sending WhatsApp reminders for upcoming shifts, following up on leave requests, and manually updating the schedule when swaps occurred. Errors were common and staff occasionally missed shifts due to miscommunication."
+solution: "Built a scheduling system using Notion as the roster database and n8n as the automation engine. Rosters are entered in Notion once per week. n8n polls the schedule daily and sends personalised Telegram messages to each staff member 24 hours and 2 hours before their shift. A Telegram bot handles leave request submissions — staff send a command, the bot logs the request in Notion, and managers receive an instant notification with one-click approval."
+outcomes:
+  - "2 hours of daily admin work fully automated"
+  - "100% of shift reminders sent — zero missed notifications"
+  - "Leave requests processed in Notion automatically via Telegram bot"
+  - "Managers notified instantly of coverage gaps when leave is approved"
+  - "Staff no-show rate reduced due to consistent timely reminders"
+---
+
+An end-to-end staff scheduling automation system replacing daily manual WhatsApp reminders with a Notion + Telegram bot pipeline.

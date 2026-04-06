@@ -1,0 +1,30 @@
+---
+title: "Google Sheets → Notion Real-Time Data Sync Pipeline"
+description: "Bidirectional sync pipeline between Google Sheets and Notion — keeps both systems in sync automatically with zero manual exports or copy-pasting."
+summary: "A consultancy was maintaining duplicate data in Google Sheets (for client reporting) and Notion (for internal project management). Staff spent 2–3 hours per week manually syncing data between the two. Built an n8n pipeline that detects changes in Google Sheets and automatically updates the corresponding Notion database records in real time — and vice versa."
+category: "Workflow"
+tags: ["n8n", "Google Sheets API", "Notion API", "Webhooks", "Data Sync", "Automation"]
+year: 2025
+role: "Automation Engineer"
+status: "Live"
+type: "Client Project"
+featured: false
+draft: true
+metrics:
+  - { value: "Real-time", label: "Sync speed" }
+  - { value: "2-3hrs", label: "Saved weekly" }
+  - { value: "0", label: "Manual sync steps" }
+links:
+  github: ""
+  demo: ""
+problem: "A consultancy firm used Google Sheets for client-facing reporting and Notion for internal project tracking. The same data lived in both places, and a team member had to manually copy updates between systems — a task that consumed 2–3 hours every week and regularly resulted in out-of-sync records causing confusion."
+solution: "Built a two-way sync pipeline in n8n. Google Sheets changes trigger a webhook that updates the matching Notion database row using the record ID as the key. Notion page updates trigger via polling that pushes changes back to the corresponding Google Sheets row. Added conflict resolution logic to handle simultaneous edits, using timestamp comparison to determine which version is authoritative."
+outcomes:
+  - "Both systems stay in sync within seconds of any change"
+  - "2–3 hours of weekly manual sync work fully eliminated"
+  - "No more out-of-sync data causing team confusion"
+  - "Conflict resolution handles simultaneous edits gracefully"
+  - "Audit log of all sync events stored in Notion for traceability"
+---
+
+A real-time bidirectional sync pipeline eliminating manual data duplication between Google Sheets and Notion for a consulting firm.

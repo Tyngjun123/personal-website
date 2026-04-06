@@ -38,6 +38,7 @@ const projects = defineCollection({
     status: z.string(),               // "Live" | "In Progress" | "Archived"
     type: z.string(),                 // "Internal Tool" | "Open Source"
     featured: z.boolean().default(false),
+    draft: z.boolean().default(false),
     metrics: z.array(z.object({
       value: z.string(),
       label: z.string(),

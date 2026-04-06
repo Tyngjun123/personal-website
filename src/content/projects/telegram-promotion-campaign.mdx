@@ -1,0 +1,30 @@
+---
+title: "Telegram Promotion Campaign Automation System"
+description: "Automated campaign system that sends personalised Telegram promotions to thousands of members with smart rate limiting, delivery tracking, and retry logic."
+summary: "A service business running weekly member promotions was manually sending Telegram messages to thousands of contacts — inconsistent timing, frequent errors, and no delivery tracking. Built a fully automated campaign system in n8n that fetches eligible members from MySQL, sends personalised messages in batches with rate limiting, logs delivery status, and retries failed sends automatically."
+category: "Platform"
+tags: ["Telegram API", "n8n", "MySQL", "Node.js", "Rate Limiting", "Campaign Automation"]
+year: 2024
+role: "Automation Engineer"
+status: "Live"
+type: "Internal Tool"
+featured: false
+draft: true
+metrics:
+  - { value: "10,000+", label: "Messages per campaign" }
+  - { value: "99.2%", label: "Delivery success rate" }
+  - { value: "0", label: "Manual steps per campaign" }
+links:
+  github: ""
+  demo: ""
+problem: "A membership-based business was running weekly promotional campaigns via Telegram. The team manually exported member lists, pasted messages one by one, and had no way to track who received what. Campaigns regularly ran late, some members received duplicates, and there was no visibility into delivery failures."
+solution: "Built an n8n campaign pipeline triggered by a simple webhook. It fetches the eligible member list from MySQL based on configurable filters (tier, join date, activity), processes them in batches of 50 using SplitInBatches, sends personalised messages via Telegram Bot API with rate limiting to avoid API blocks, logs each delivery result back to MySQL, and runs an automatic retry for any failed sends after a 30-minute delay."
+outcomes:
+  - "Campaigns now launch on schedule with a single trigger"
+  - "Delivery success rate improved to 99.2% with automatic retries"
+  - "Full delivery log in MySQL — who received what, when, and status"
+  - "Zero duplicate sends through MySQL-based send history checking"
+  - "Team time spent on campaigns reduced from 3 hours to under 5 minutes"
+---
+
+A production-grade Telegram campaign automation system handling 10,000+ personalised messages per campaign with full delivery tracking and retry logic.

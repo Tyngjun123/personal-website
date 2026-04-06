@@ -1,0 +1,30 @@
+---
+title: "Automated Weekly Performance Report System"
+description: "Replaces 90 minutes of manual Monday morning reporting with an automated pipeline that pulls, compiles, and delivers management reports before 8am."
+summary: "A professional services firm's operations manager spent 90 minutes every Monday compiling performance data from multiple systems into a management report. Built an n8n workflow that runs automatically at 7:30am every Monday, pulls data from MySQL and Google Sheets, calculates KPIs, formats a clean HTML report, and delivers it to management via email and Telegram before the working day begins."
+category: "Automation"
+tags: ["n8n", "MySQL", "Google Sheets", "Gmail", "Telegram", "Reporting"]
+year: 2025
+role: "Automation Engineer"
+status: "Live"
+type: "Client Project"
+featured: false
+draft: true
+metrics:
+  - { value: "90min", label: "Saved every Monday" }
+  - { value: "100%", label: "On-time delivery" }
+  - { value: "0", label: "Manual steps required" }
+links:
+  github: ""
+  demo: ""
+problem: "Every Monday, an operations manager spent 90 minutes manually pulling sales figures, lead counts, and conversion data from three different systems, calculating week-on-week changes, formatting the numbers into a spreadsheet, writing a summary, and emailing it to management. The process was repetitive, error-prone, and the first thing the manager dreaded every week."
+solution: "Built a scheduled n8n workflow that triggers at 7:30am every Monday. It queries MySQL for sales data, fetches lead counts from Google Sheets, calculates conversion rates and week-on-week changes in a Code node, assembles a formatted HTML report with colour-coded KPIs, and delivers it via Gmail to management and via Telegram to the ops team — all before anyone starts their day."
+outcomes:
+  - "90 minutes of manual work eliminated every Monday"
+  - "Reports delivered at 7:30am without fail — before the working day begins"
+  - "Week-on-week calculations are always accurate — no manual formula errors"
+  - "Management receives consistent, professionally formatted reports"
+  - "Operations manager redirected 6 hours per month to higher-value work"
+---
+
+An automated reporting pipeline that replaced the most dreaded Monday morning task with a zero-touch workflow delivering management reports before 8am.

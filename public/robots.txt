@@ -8,4 +8,4 @@ Allow: /
 Disallow: /drafts/
 
 # Sitemap location — Google & Bing read this
-Sitemap: https://yourdomain.com/sitemap-index.xml
+Sitemap: https://tj-portfolio-coral.vercel.app/sitemap.xml

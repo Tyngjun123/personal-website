@@ -285,6 +285,85 @@ const allJourneyItems = [
     </div>
   </section>
 
+  <!-- ══ CONTACT / CTA ══ -->
+  <section class="section-contact reveal-section">
+    <div class="contact-mesh" aria-hidden="true">
+      <div class="contact-blob contact-blob-1"></div>
+      <div class="contact-blob contact-blob-2"></div>
+      <div class="contact-blob contact-blob-3"></div>
+      <div class="contact-dots"></div>
+    </div>
+    <div class="container contact-inner">
+      <p class="contact-eyebrow">// get in touch</p>
+      <h2 class="contact-headline">
+        Let's build something<br />
+        <span class="contact-headline-grad">that works.</span>
+      </h2>
+      <p class="contact-sub">
+        Have a process you want to automate? A system to build?<br class="contact-br" />
+        I'm open to freelance projects, consulting, and collaborations.
+      </p>
+
+      <div class="contact-btns">
+        <a href="https://wa.me/60123456789" target="_blank" rel="noopener" class="btn-primary">Start a project</a>
+        <a href="/projects" class="btn-ghost">View my work</a>
+      </div>
+
+      <div class="contact-cards">
+        <!-- WhatsApp -->
+        <a href="https://wa.me/60123456789" target="_blank" rel="noopener" class="contact-card">
+          <div class="contact-card-icon contact-card-icon--whatsapp">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.535 5.858L.057 23.617a.75.75 0 00.92.92l5.71-1.464A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.713 9.713 0 01-5.003-1.384l-.36-.214-3.733.957.988-3.61-.235-.373A9.716 9.716 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/>
+            </svg>
+          </div>
+          <div class="contact-card-body">
+            <span class="contact-card-label">WhatsApp</span>
+            <span class="contact-card-value">+60 12-345 6789</span>
+          </div>
+          <svg class="contact-card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17L17 7M17 7H7M17 7v10"/>
+          </svg>
+        </a>
+
+        <!-- Email -->
+        <a href={`mailto:${SITE.email}`} class="contact-card">
+          <div class="contact-card-icon contact-card-icon--email">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="M22 7l-10 7L2 7"/>
+            </svg>
+          </div>
+          <div class="contact-card-body">
+            <span class="contact-card-label">Email</span>
+            <span class="contact-card-value">{SITE.email}</span>
+          </div>
+          <svg class="contact-card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17L17 7M17 7H7M17 7v10"/>
+          </svg>
+        </a>
+
+        <!-- LinkedIn -->
+        <a href={SITE.social.linkedin} target="_blank" rel="noopener" class="contact-card">
+          <div class="contact-card-icon contact-card-icon--linkedin">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </div>
+          <div class="contact-card-body">
+            <span class="contact-card-label">LinkedIn</span>
+            <span class="contact-card-value">Connect with me</span>
+          </div>
+          <svg class="contact-card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17L17 7M17 7H7M17 7v10"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
   <!-- ══ ARTICLES — CARD GRID ══ -->
   <section class="section-articles reveal-section">
     <div class="container">
@@ -962,5 +1041,125 @@ const allJourneyItems = [
     .ticker-item { padding: 0 18px; font-size: 10px; }
     .section-header--row { flex-direction: column; align-items: flex-start; gap: 8px; }
     .timeline-card:hover { transform: none; }
+  }
+
+  /* ── Contact / CTA ── */
+  .section-contact {
+    position: relative; overflow: hidden;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 80px 0;
+  }
+
+  /* Mesh background */
+  .contact-mesh { position: absolute; inset: 0; pointer-events: none; }
+  .contact-blob { position: absolute; border-radius: 50%; }
+  .contact-blob-1 {
+    top: -80px; left: -60px; width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(99,102,241,0.10) 0%, rgba(37,99,235,0.05) 40%, transparent 70%);
+  }
+  .contact-blob-2 {
+    bottom: -60px; right: -40px; width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 65%);
+  }
+  .contact-blob-3 {
+    top: 40%; left: 55%; width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%);
+  }
+  .contact-dots {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, #bfdbfe 1px, transparent 1px);
+    background-size: 28px 28px; opacity: 0.22;
+  }
+
+  /* Inner layout */
+  .contact-inner {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center; text-align: center;
+  }
+
+  .contact-eyebrow {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--blue-500); margin-bottom: 16px;
+  }
+
+  .contact-headline {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800; line-height: 1.1; letter-spacing: -0.03em;
+    color: var(--ink); margin-bottom: 20px;
+  }
+  .contact-headline-grad {
+    background: var(--gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .contact-sub {
+    font-size: 15px; color: var(--ink-3); line-height: 1.8;
+    max-width: 480px; margin-bottom: 36px;
+  }
+  .contact-br { display: none; }
+  @media (min-width: 640px) { .contact-br { display: block; } }
+
+  /* CTA buttons */
+  .contact-btns {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    justify-content: center; margin-bottom: 52px;
+  }
+
+  /* Contact cards */
+  .contact-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    width: 100%; max-width: 680px;
+  }
+  @media (min-width: 640px) {
+    .contact-cards { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .contact-card {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 16px 18px;
+    text-decoration: none; transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    text-align: left;
+  }
+  .contact-card:hover {
+    border-color: var(--blue-200);
+    box-shadow: 0 8px 28px rgba(37,99,235,0.10);
+    transform: translateY(-3px);
+  }
+
+  .contact-card-icon {
+    width: 42px; height: 42px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .contact-card-icon--whatsapp { background: #dcfce7; color: #16a34a; }
+  .contact-card-icon--email    { background: var(--blue-50); color: var(--blue-600); }
+  .contact-card-icon--linkedin { background: #dbeafe; color: #1d4ed8; }
+
+  .contact-card-body {
+    flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0;
+  }
+  .contact-card-label {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-4);
+  }
+  .contact-card-value {
+    font-size: 13px; font-weight: 600; color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .contact-card-arrow {
+    color: var(--ink-5); flex-shrink: 0;
+    transition: color 0.2s, transform 0.2s;
+  }
+  .contact-card:hover .contact-card-arrow {
+    color: var(--blue-500); transform: translate(2px, -2px);
   }
 </style>

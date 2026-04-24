@@ -1,0 +1,134 @@
+---
+title: "How to Build a Multi-Channel Notification Pipeline in Under a Day"
+description: "A practical guide to building a single notification system that routes alerts to WhatsApp, Telegram, and email based on urgency — using n8n with no code."
+publishedDate: "2026-03-22"
+category: "Automation"
+tags: ["n8n", "Notifications", "WhatsApp", "Telegram", "Email"]
+readTime: "6 min"
+toc: true
+draft: false
+featured: false
+keywords: ["multi-channel notifications n8n", "notification automation", "n8n alert system", "WhatsApp Telegram email automation"]
+---
+
+Most teams I've worked with have a notification problem — not too few, but too many, in too many places. Slack pings for everything. Email for everything else. WhatsApp groups for things that need immediate attention. No one knows where to look.
+
+A well-designed notification pipeline solves this. One input, intelligent routing, right message to the right channel.
+
+## The routing logic
+
+Not all alerts are equal. I use three tiers:
+
+| Priority | Channel | When to use |
+|---|---|---|
+| P1 — Critical | WhatsApp | System down, payment failed, security event |
+| P2 — Important | Telegram | New lead, task blocked, SLA breach approaching |
+| P3 — Info | Email | Daily summaries, scheduled reports, low-urgency updates |
+
+The pipeline accepts a priority field in the payload and routes accordingly.
+
+## The webhook input
+
+All notification triggers send a POST to a single n8n webhook:
+
+```json
+{
+  "priority": "P1",
+  "title": "Payment Gateway Down",
+  "message": "Stripe webhook returning 503 errors. Affecting all checkout flows.",
+  "source": "monitoring-system",
+  "timestamp": "2026-03-22T14:30:00+08:00"
+}
+```
+
+Using one webhook for everything means you add new alert sources without changing the routing logic.
+
+## Building the router in n8n
+
+### Step 1 — Webhook node
+
+Standard POST webhook, no authentication required for internal use (or add header auth for external sources).
+
+### Step 2 — Switch node
+
+The Switch node routes based on `{{ $json.priority }}`:
+
+- P1 → WhatsApp branch
+- P2 → Telegram branch
+- P3 → Email branch
+- Default → Telegram (fail-safe)
+
+### Step 3 — WhatsApp branch (P1)
+
+HTTP Request to WhatsApp Business API. Use a pre-approved template for speed (template messages send instantly without rate limits).
+
+Also: send a Telegram message to an engineering group so there's a backup notification.
+
+### Step 4 — Telegram branch (P2)
+
+Telegram node to the relevant group. Format the message with emoji indicators for quick scanning:
+
+```
+🟡 [P2] {{ $json.title }}
+{{ $json.message }}
+Source: {{ $json.source }}
+Time: {{ $json.timestamp }}
+```
+
+### Step 5 — Email branch (P3)
+
+SMTP node or SendGrid node. HTML email with full context:
+
+```html
+<h2>{{ $json.title }}</h2>
+<p>{{ $json.message }}</p>
+<p><small>Source: {{ $json.source }} | {{ $json.timestamp }}</small></p>
+```
+
+## Escalation logic
+
+For P1 alerts, add an escalation step:
+
+1. Send WhatsApp immediately
+2. Wait node — 5 minutes
+3. HTTP Request — check if alert is resolved (query your monitoring system)
+4. If not resolved — send to a second WhatsApp number (backup contact)
+
+This ensures critical alerts don't go unnoticed if the primary contact misses the first message.
+
+## Logging every notification
+
+Add a MySQL node at the end of every branch:
+
+```sql
+INSERT INTO notification_log (priority, title, message, channel, sent_at)
+VALUES ({{ $json.priority }}, {{ $json.title }}, {{ $json.message }}, 'whatsapp', NOW())
+```
+
+This gives you an audit trail — useful for post-mortems and for tracking alert frequency per source.
+
+## Adding new alert sources
+
+Once the pipeline is running, adding a new source is trivial:
+
+```python
+import requests
+
+requests.post("https://your-n8n.com/webhook/alerts", json={
+    "priority": "P2",
+    "title": "New Enterprise Lead",
+    "message": f"Company: {company}, Contact: {contact}",
+    "source": "crm-system"
+})
+```
+
+Any system that can make an HTTP request can now send structured, routed notifications.
+
+## Time to build
+
+- Webhook + Switch + three branches: ~2 hours
+- Escalation logic: ~1 hour
+- Logging: ~30 minutes
+- Testing: ~1 hour
+
+Under a day, as promised. The routing framework pays for itself on the first real P1 alert.

@@ -1,0 +1,195 @@
+---
+title: "MySQL for Automation Engineers: The Only SQL You Actually Need"
+description: "A focused SQL guide for people building automation workflows — covering the queries, patterns, and concepts that come up constantly in real n8n and automation projects."
+publishedDate: "2026-04-08"
+category: "Automation"
+tags: ["MySQL", "SQL", "n8n", "Database", "Tutorial"]
+readTime: "8 min"
+toc: true
+draft: false
+featured: false
+keywords: ["MySQL automation", "SQL for automation", "n8n MySQL queries", "MySQL n8n tutorial", "automation database"]
+---
+
+You don't need to be a database administrator to use MySQL effectively in automation workflows. You need about 20% of SQL knowledge to handle 80% of automation use cases.
+
+This guide focuses on exactly that 20%.
+
+## Why MySQL in automation
+
+When automation workflows just pass data between APIs, a database isn't necessary. But as workflows grow in complexity, you need somewhere to:
+
+- Store state (what stage is this lead in?)
+- Maintain lists (who are the active subscribers?)
+- Log events (what happened and when?)
+- Query historical data (how many leads came in this week?)
+
+MySQL is free, runs on any server, and n8n has a built-in MySQL node. It's the natural choice.
+
+## The four queries you'll use 90% of the time
+
+### INSERT — store new data
+
+```sql
+INSERT INTO leads (name, phone, email, status, created_at)
+VALUES ('Ahmad Razif', '60123456789', 'ahmad@example.com', 'new', NOW());
+```
+
+In n8n, use `{{ $json.name }}` instead of hardcoded values.
+
+### SELECT — retrieve data
+
+```sql
+-- Get all active subscribers
+SELECT chat_id, name FROM subscribers
+WHERE status = 'active'
+ORDER BY subscribed_at DESC;
+
+-- Get leads from the last 7 days
+SELECT * FROM leads
+WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY);
+
+-- Count by status
+SELECT status, COUNT(*) as count
+FROM leads
+GROUP BY status;
+```
+
+### UPDATE — change existing records
+
+```sql
+-- Mark a lead as contacted
+UPDATE leads
+SET status = 'contacted', contacted_at = NOW()
+WHERE phone = '60123456789';
+
+-- Opt out a subscriber
+UPDATE subscribers
+SET status = 'opted_out'
+WHERE chat_id = 123456789;
+```
+
+### DELETE — remove records (use sparingly)
+
+```sql
+-- Soft delete is usually better (UPDATE status instead)
+-- But when you need to hard delete:
+DELETE FROM temp_queue WHERE processed_at < DATE_SUB(NOW(), INTERVAL 7 DAY);
+```
+
+## Key patterns for automation
+
+### Upsert — insert or update if exists
+
+Common when you receive a record that might be new or might already exist:
+
+```sql
+INSERT INTO leads (phone, name, email, source)
+VALUES ('60123456789', 'Ahmad', 'ahmad@example.com', 'website')
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  email = VALUES(email),
+  updated_at = NOW();
+```
+
+Requires a UNIQUE constraint on the `phone` column.
+
+### Check-then-act pattern
+
+Before sending a message, check if one was already sent recently:
+
+```sql
+SELECT COUNT(*) as sent_recently
+FROM message_log
+WHERE phone = '60123456789'
+AND sent_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)
+AND type = 'follow_up';
+```
+
+Use an IF node in n8n: if `sent_recently > 0`, skip. Otherwise, send.
+
+### Status machine pattern
+
+Track records through stages:
+
+```sql
+-- Valid status transitions
+UPDATE deals
+SET status = 'proposal_sent', updated_at = NOW()
+WHERE id = 42 AND status = 'qualified';
+-- Only updates if current status is 'qualified'
+-- Prevents invalid transitions
+```
+
+The WHERE clause on the current status acts as a guard — won't update if the record has already moved to a different stage.
+
+## Useful MySQL functions for automation
+
+```sql
+NOW()                    -- current datetime
+DATE_SUB(NOW(), INTERVAL 7 DAY)  -- 7 days ago
+DATE_FORMAT(NOW(), '%Y-%m-%d')   -- date as string
+FIND_IN_SET('vip', tags)         -- find value in comma-separated string
+COALESCE(value, 'default')       -- use fallback if value is NULL
+IFNULL(value, 0)                 -- NULL-safe default
+```
+
+## Table design for common automation tables
+
+### Leads table
+
+```sql
+CREATE TABLE leads (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  phone VARCHAR(20) UNIQUE,
+  email VARCHAR(255),
+  source VARCHAR(100),
+  status ENUM('new', 'contacted', 'qualified', 'converted', 'lost') DEFAULT 'new',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+### Message log table
+
+```sql
+CREATE TABLE message_log (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  phone VARCHAR(20),
+  channel ENUM('whatsapp', 'telegram', 'email'),
+  type VARCHAR(100),
+  content TEXT,
+  status ENUM('sent', 'failed', 'delivered'),
+  sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Workflow execution log
+
+```sql
+CREATE TABLE workflow_log (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  workflow_name VARCHAR(255),
+  status ENUM('success', 'error', 'partial'),
+  records_processed INT DEFAULT 0,
+  records_failed INT DEFAULT 0,
+  started_at TIMESTAMP,
+  completed_at TIMESTAMP,
+  notes TEXT
+);
+```
+
+## One more tip: indexes matter
+
+If you're querying a table with tens of thousands of rows by `status` or `phone`, add an index:
+
+```sql
+CREATE INDEX idx_leads_status ON leads(status);
+CREATE INDEX idx_leads_phone ON leads(phone);
+CREATE INDEX idx_message_log_phone_type ON message_log(phone, type);
+```
+
+Without indexes, queries on large tables can take seconds. With indexes, milliseconds.
+
+For automation workflows processing hundreds of records per run, this matters.

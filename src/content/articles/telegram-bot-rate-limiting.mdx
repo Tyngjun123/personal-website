@@ -1,0 +1,145 @@
+---
+title: "Rate Limiting Strategies for High-Volume Telegram Bots"
+description: "How to handle Telegram's API rate limits when broadcasting to large subscriber lists — including batching, backoff strategies, and avoiding temporary bans."
+publishedDate: "2026-04-05"
+category: "Automation"
+tags: ["Telegram", "Bot", "Rate Limiting", "n8n", "API"]
+readTime: "5 min"
+toc: true
+draft: false
+featured: false
+keywords: ["Telegram bot rate limit", "Telegram API limits", "high volume Telegram bot", "n8n Telegram broadcast"]
+---
+
+If you've built a Telegram bot that sends messages to a large subscriber list, you've probably run into this error:
+
+```
+429 Too Many Requests: retry after 30
+```
+
+Telegram's Bot API has rate limits. Exceed them and your bot gets throttled or temporarily blocked. At scale, ignoring rate limits means failed deliveries and degraded performance.
+
+Here's how to handle it properly.
+
+## Telegram's rate limits
+
+The official limits (as of 2025):
+
+- **Global limit**: 30 messages per second across all chats
+- **Same group**: 20 messages per minute to the same group/channel
+- **Error response**: HTTP 429 with `retry_after` in the response body
+
+For individual private chats (person-to-person messages from a bot), the limit is more generous — roughly 1 message per second per chat, with the global 30 msg/sec cap applying overall.
+
+## Strategy 1 — Batch processing with pauses
+
+The simplest approach: process subscribers in batches and pause between batches.
+
+In n8n:
+
+1. **MySQL node** — fetch all active subscribers
+2. **SplitInBatches node** — batch size: 25
+3. **Telegram node** — send message (inside the batch loop)
+4. **Wait node** — 1 second pause after each batch
+
+This gives you ~25 messages/second, comfortably under the 30 msg/sec limit.
+
+For 1,000 subscribers:
+- 40 batches × 1 second each = ~45 seconds total
+- Well within rate limits, reliable delivery
+
+## Strategy 2 — Respect the retry_after header
+
+When you do hit a 429, Telegram tells you how long to wait. Handle it explicitly.
+
+In n8n, use a Code node after the Telegram send:
+
+```javascript
+const response = $input.item.json;
+
+if (response.statusCode === 429) {
+  const retryAfter = response.body.parameters?.retry_after || 30;
+  // Log the retry requirement
+  return {
+    json: {
+      status: 'rate_limited',
+      retryAfter,
+      chatId: $('Data').item.json.chat_id
+    }
+  };
+}
+
+return { json: { status: 'sent', chatId: $('Data').item.json.chat_id } };
+```
+
+Write rate-limited chat IDs to a retry queue in MySQL, then process the queue after the wait period.
+
+## Strategy 3 — Exponential backoff
+
+For retries, use exponential backoff: wait 1s, then 2s, then 4s, then 8s — up to a maximum.
+
+```javascript
+const attempt = $json.attempt || 1;
+const waitSeconds = Math.min(Math.pow(2, attempt - 1), 60);
+
+return {
+  json: {
+    ...($json),
+    waitSeconds,
+    nextAttempt: attempt + 1
+  }
+};
+```
+
+Cap at 60 seconds. If a message still fails after 5 attempts, log it as failed and alert.
+
+## Strategy 4 — Distribute over time
+
+For non-urgent broadcasts (newsletters, weekly summaries), don't send all messages at once — spread them over minutes.
+
+In n8n, add a random wait between each message:
+
+```javascript
+const minWait = 100; // ms
+const maxWait = 500; // ms
+const wait = Math.floor(Math.random() * (maxWait - minWait)) + minWait;
+
+// Use this wait value in a subsequent Wait node
+return { json: { ...$json, waitMs: wait } };
+```
+
+Randomising the interval makes your bot look less like a machine and reduces the chance of pattern-based throttling.
+
+## Monitoring delivery
+
+Track delivery status in MySQL:
+
+```sql
+CREATE TABLE telegram_delivery_log (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  chat_id BIGINT,
+  broadcast_id VARCHAR(36),
+  status ENUM('sent', 'failed', 'rate_limited', 'pending_retry'),
+  attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  error_code INT,
+  retry_count INT DEFAULT 0
+);
+```
+
+After every broadcast, query for failed/rate_limited records and process them in a follow-up workflow.
+
+## What not to do
+
+**Don't flood and hope** — sending 1,000 messages as fast as possible will get your bot blocked. The temporary ban (usually 1–24 hours) is worse than the 45 seconds it takes to send properly.
+
+**Don't ignore 429s** — if you swallow the error and continue, some subscribers simply don't receive the message. Silent failures are worse than slow sends.
+
+**Don't use the same bot for everything** — if you have both a promotional bot and an alert bot, use separate bot tokens. A rate limit on your promo bot won't block your operational alerts.
+
+## Summary
+
+For up to ~500 subscribers: batch size 25, 1-second pause between batches — simple and reliable.
+
+For 500–5,000 subscribers: add retry logic with exponential backoff and a delivery log.
+
+For 5,000+ subscribers: distribute sends over 5–10 minutes, use multiple bot tokens if needed, and treat delivery as a background job not a synchronous operation.

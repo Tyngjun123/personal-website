@@ -1,0 +1,115 @@
+---
+title: "How I Automated Lead Management with n8n and WhatsApp API"
+description: "A real-world walkthrough of building a fully automated lead pipeline using n8n workflows, WhatsApp Business API, and MySQL — from form submission to follow-up."
+publishedDate: "2026-03-01"
+category: "Automation"
+tags: ["n8n", "WhatsApp", "Lead Management", "MySQL", "Automation"]
+readTime: "8 min"
+toc: true
+draft: false
+featured: false
+keywords: ["automate lead management", "n8n WhatsApp automation", "lead pipeline n8n", "WhatsApp Business API automation"]
+---
+
+Before automation, our lead management looked like this: form submission comes in, someone checks the inbox, copies the data into a spreadsheet, manually sends a WhatsApp message, and marks it as contacted — hours later, sometimes the next day.
+
+After automation: lead comes in, WhatsApp message sent in under 30 seconds, data logged in MySQL, sales team notified on Telegram, and a follow-up reminder scheduled automatically.
+
+Here's exactly how I built it.
+
+## The problem with manual lead handling
+
+Every minute between a lead submitting a form and receiving a response, conversion probability drops. Studies consistently show that contacting a lead within 5 minutes increases conversion rates by 9x compared to waiting 30 minutes.
+
+Manual processes can't hit that window consistently. People get busy. Notifications get missed. Leads go cold.
+
+## The architecture
+
+The workflow has four stages:
+
+1. **Trigger** — webhook receives form submission
+2. **Enrich** — data is normalised and stored in MySQL
+3. **Notify** — WhatsApp message sent to lead, Telegram alert sent to sales team
+4. **Schedule** — follow-up reminder created if no reply after 24 hours
+
+## Building the webhook trigger
+
+In n8n, create a Webhook node set to POST. Copy the URL and add it to your form's action field.
+
+The payload coming in looks like:
+
+```json
+{
+  "name": "Ahmad Razif",
+  "phone": "60123456789",
+  "email": "ahmad@example.com",
+  "interest": "WhatsApp Bot Setup",
+  "source": "landing-page"
+}
+```
+
+Add a Set node after the webhook to normalise phone numbers — strip spaces, dashes, and add country code if missing.
+
+## Storing in MySQL
+
+Use the MySQL node with an INSERT query:
+
+```sql
+INSERT INTO leads (name, phone, email, interest, source, created_at, status)
+VALUES ({{ $json.name }}, {{ $json.phone }}, {{ $json.email }}, {{ $json.interest }}, {{ $json.source }}, NOW(), 'new')
+```
+
+This gives you a full audit trail of every lead, timestamped.
+
+## Sending the WhatsApp message
+
+Use the HTTP Request node with your WhatsApp Business API credentials. The body:
+
+```json
+{
+  "messaging_product": "whatsapp",
+  "to": "{{ $json.phone }}",
+  "type": "template",
+  "template": {
+    "name": "lead_welcome",
+    "language": { "code": "en" },
+    "components": [{
+      "type": "body",
+      "parameters": [{ "type": "text", "text": "{{ $json.name }}" }]
+    }]
+  }
+}
+```
+
+Pre-approve your message template in Meta Business Manager. This takes 1–2 days.
+
+## Notifying the sales team
+
+A simple Telegram node sends a formatted message to your sales group:
+
+```
+🔔 New Lead
+Name: {{ $json.name }}
+Phone: {{ $json.phone }}
+Interest: {{ $json.interest }}
+Source: {{ $json.source }}
+```
+
+## Scheduling the follow-up
+
+If no reply after 24 hours, trigger a follow-up. Use a Wait node set to 24 hours, then check the MySQL record for a "replied" status before sending.
+
+```sql
+SELECT status FROM leads WHERE phone = {{ $json.phone }} ORDER BY created_at DESC LIMIT 1
+```
+
+If status is still "new", send the follow-up. If "replied", skip.
+
+## Results
+
+After running this for 3 months:
+- Average first-contact time dropped from 4 hours to under 1 minute
+- Follow-up compliance went from ~60% (manual) to 100% (automated)
+- Sales team spends zero time on data entry
+
+The workflow runs 24/7 including weekends and public holidays — no human required.

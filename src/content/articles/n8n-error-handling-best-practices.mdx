@@ -1,0 +1,162 @@
+---
+title: "n8n Error Handling Best Practices: Build Workflows That Don't Break Silently"
+description: "How to add proper error handling to n8n workflows — covering try/catch patterns, error workflows, retry logic, dead letter queues, and alerting."
+publishedDate: "2026-04-07"
+category: "Automation"
+tags: ["n8n", "Error Handling", "Best Practices", "Automation", "Production"]
+readTime: "7 min"
+toc: true
+draft: false
+featured: false
+keywords: ["n8n error handling", "n8n workflow errors", "n8n production best practices", "n8n retry logic"]
+---
+
+The difference between a demo workflow and a production workflow is error handling. Demos run the happy path. Production encounters the real world.
+
+APIs time out. Databases go offline. Input data arrives malformed. Users send unexpected values. When this happens in an unhandled workflow, one of two things occurs: the execution crashes and you find out by checking the n8n UI, or it fails silently and you never find out.
+
+Both are bad. Here's how to do it right.
+
+## 1. The Error Workflow
+
+n8n has a built-in error workflow feature. Every workflow can specify an "Error Workflow" that runs when an unhandled error occurs.
+
+Set this up globally:
+
+1. Create a new workflow: `[ERROR HANDLER]`
+2. Add an `Error Trigger` node as the start
+3. The trigger provides: workflow name, node name, error message, timestamp, and the input data that caused the failure
+4. Add a Telegram or Slack notification with this context
+
+```
+🔴 Workflow Error
+Workflow: {{ $json.workflow.name }}
+Node: {{ $json.execution.lastNodeExecuted }}
+Error: {{ $json.error.message }}
+Time: {{ $json.execution.startedAt }}
+```
+
+5. Optionally: write the failure to a MySQL error log table
+6. In each production workflow → Settings → Error Workflow → select `[ERROR HANDLER]`
+
+This catches unhandled errors across all workflows. It's the safety net.
+
+## 2. Try/Catch Pattern with Continue on Fail
+
+For expected failure points (external API calls, database writes), use n8n's "Continue on Fail" setting on the node:
+
+- Enable "Continue on Fail" on the node
+- The workflow continues even if this node fails
+- The output includes `$json.error` if the node failed
+
+Follow with an IF node:
+
+```
+Condition: {{ $json.error }} exists
+True branch → handle failure (log, alert, skip)
+False branch → continue normal flow
+```
+
+This lets you handle specific failure modes differently.
+
+## 3. Retry logic for transient failures
+
+For API calls, transient failures (timeouts, 503s) are common. Don't fail immediately — retry.
+
+In the HTTP Request node settings → "Retry on Fail" → enable it. Options:
+- Max tries: 3
+- Wait between tries: 1000ms
+
+For more control, build manual retry logic with a Code node:
+
+```javascript
+const maxRetries = 3;
+const attempt = $json.attempt || 0;
+
+if (attempt >= maxRetries) {
+  return { json: { status: 'failed', reason: 'max_retries_exceeded', ...($json) } };
+}
+
+return { json: { ...($json), attempt: attempt + 1 } };
+```
+
+Loop back to the HTTP Request node if under max retries, route to failure handling if exceeded.
+
+## 4. Dead Letter Queue
+
+For workflows processing a list of items (lead broadcasts, report generation per client), failed items should not block the rest.
+
+Use a MySQL "dead letter queue" table:
+
+```sql
+CREATE TABLE workflow_dlq (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  workflow_name VARCHAR(255),
+  payload JSON,
+  error_message TEXT,
+  failed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  retry_count INT DEFAULT 0,
+  status ENUM('pending', 'resolved', 'abandoned') DEFAULT 'pending'
+);
+```
+
+When an item fails, INSERT it here. Run a separate workflow daily that picks up pending items and retries them.
+
+## 5. Input validation
+
+Many failures come from bad input data. Validate early — before the expensive operations.
+
+In a Code node at the start of any workflow processing external input:
+
+```javascript
+const { phone, email, name } = $json;
+
+const errors = [];
+if (!name || name.trim() === '') errors.push('name is required');
+if (!phone || !/^\d{10,15}$/.test(phone.replace(/\D/g, ''))) errors.push('invalid phone');
+if (!email || !email.includes('@')) errors.push('invalid email');
+
+if (errors.length > 0) {
+  return {
+    json: {
+      valid: false,
+      errors,
+      input: $json
+    }
+  };
+}
+
+return { json: { valid: true, ...($json) } };
+```
+
+Route invalid inputs to a separate "invalid input" handler rather than crashing the main flow.
+
+## 6. Alerting thresholds
+
+Some failures are expected occasionally but alarming in volume. Track failure counts.
+
+After writing to the dead letter queue:
+
+```sql
+SELECT COUNT(*) as recent_failures
+FROM workflow_dlq
+WHERE workflow_name = 'lead-notification'
+AND failed_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+AND status = 'pending'
+```
+
+If `recent_failures > 10` in an hour: send a high-priority alert. This pattern catches systematic failures (an API key expired, a database is down) before they become long-running incidents.
+
+## A practical checklist
+
+For every production workflow:
+
+- [ ] Error workflow assigned in settings
+- [ ] All external API calls have Continue on Fail enabled
+- [ ] Retry logic on all HTTP Request nodes
+- [ ] Input validation at the entry point
+- [ ] Failures logged to MySQL with payload preserved
+- [ ] Telegram alert for errors with workflow name and error message
+- [ ] Test the error path deliberately — kill an API endpoint and verify the alert fires
+
+Error handling isn't glamorous. It also isn't optional if you want workflows people can rely on.

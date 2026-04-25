@@ -65,6 +65,7 @@ const certificates = defineCollection({
     issuedDate: z.string(),           // "2025-01"
     expiryDate: z.string().optional(),
     credentialUrl: z.string().optional(),
+    logo: z.string().optional(),
     featured: z.boolean().default(false),
     description: z.string().optional(),
     inProgress: z.boolean().default(false),

@@ -6,5 +6,6 @@
   "color": "teal",
   "issuedDate": "2025-06",
   "featured": true,
-  "description": "Validates advanced proficiency in building, deploying, and maintaining automation workflows with n8n. Covers complex branching logic, API integrations, error handling, and production-grade pipeline design."
+  "description": "Validates advanced proficiency in building, deploying, and maintaining automation workflows with n8n. Covers complex branching logic, API integrations, error handling, and production-grade pipeline design.",
+  "logo": "https://logo.clearbit.com/n8n.io"
 }

@@ -35,40 +35,50 @@ const colorMap: Record<string, { bg: string; text: string }> = {
           const date = new Date(cert.data.issuedDate + '-01').toLocaleDateString('en-MY', {
             year: 'numeric', month: 'short',
           });
+          const expiry = cert.data.expiryDate
+            ? new Date(cert.data.expiryDate + '-01').toLocaleDateString('en-MY', { year: 'numeric', month: 'short' })
+            : null;
+          const Tag = cert.data.credentialUrl ? 'a' : 'div';
           return (
-            <li
+            <Tag
               class="cert-item"
-              role="button"
-              tabindex="0"
-              data-modal="cert"
-              data-name={cert.data.name}
-              data-issuer={cert.data.issuer}
-              data-issuer-short={cert.data.issuerShort}
-              data-category={cert.data.category}
-              data-color={cert.data.color}
-              data-issued-date={date}
-              data-expiry-date={cert.data.expiryDate ?? ''}
-              data-credential-url={cert.data.credentialUrl ?? ''}
-              data-description={cert.data.description ?? ''}
-              data-in-progress={cert.data.inProgress ? 'true' : 'false'}
-              data-progress={String(cert.data.progress ?? 0)}
+              href={cert.data.credentialUrl ?? undefined}
+              target={cert.data.credentialUrl ? '_blank' : undefined}
+              rel={cert.data.credentialUrl ? 'noopener noreferrer' : undefined}
             >
-              <div class="cert-badge" style={`background:${color.bg}; color:${color.text}`}>
-                {cert.data.issuerShort}
+              <div class="cert-badge" style={`background:${color.bg}`}>
+                {cert.data.logo ? (
+                  <img
+                    src={cert.data.logo}
+                    alt={cert.data.issuerShort}
+                    width="36" height="36"
+                    style="object-fit:contain; border-radius:6px;"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                  />
+                ) : null}
+                <span
+                  class="cert-badge-text"
+                  style={`color:${color.text}; display:${cert.data.logo ? 'none' : 'block'}`}
+                >
+                  {cert.data.issuerShort}
+                </span>
               </div>
               <div class="cert-info">
                 <div class="cert-name">{cert.data.name}</div>
                 <div class="cert-meta">
                   <span>{cert.data.issuer}</span>
                   <span class="cert-dot"></span>
-                  <span>{date}</span>
-                  {cert.data.expiryDate && (
+                  <span>Issued {date}</span>
+                  {expiry && (
                     <>
                       <span class="cert-dot"></span>
-                      <span>Expires {cert.data.expiryDate}</span>
+                      <span>Expires {expiry}</span>
                     </>
                   )}
                 </div>
+                {cert.data.description && (
+                  <p class="cert-desc">{cert.data.description}</p>
+                )}
                 {cert.data.inProgress && (
                   <div class="cert-progress-wrap">
                     <div class="cert-progress-track">
@@ -81,14 +91,12 @@ const colorMap: Record<string, { bg: string; text: string }> = {
               <div class="cert-right">
                 <span class="cert-cat">{cert.data.category}</span>
                 {cert.data.credentialUrl ? (
-                  <a href={cert.data.credentialUrl} target="_blank" rel="noopener noreferrer" class="cert-link">
-                    Verify ✓
-                  </a>
+                  <span class="cert-link">Verify ↗</span>
                 ) : (
                   <span class="cert-verified">✓ Verified</span>
                 )}
               </div>
-            </li>
+            </Tag>
           );
         })}
       </ul>
@@ -141,16 +149,18 @@ const colorMap: Record<string, { bg: string; text: string }> = {
 
   .cert-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 20px;
     padding: 20px 0;
     border-bottom: 1px solid var(--border);
     transition: background 0.15s;
-    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
   }
   .cert-item:first-child { border-top: 1px solid var(--border); }
-  .cert-item:hover { background: var(--blue-50); }
-  .cert-item:focus-visible { outline: 2px solid var(--blue-400); outline-offset: 2px; border-radius: var(--radius); }
+  a.cert-item { cursor: pointer; }
+  a.cert-item:hover { background: var(--blue-50); padding-left: 8px; padding-right: 8px; margin: 0 -8px; border-radius: var(--radius); border-bottom-color: transparent; }
+  a.cert-item:focus-visible { outline: 2px solid var(--blue-400); outline-offset: 2px; border-radius: var(--radius); }
 
   .cert-badge {
     width: 52px;
@@ -159,10 +169,14 @@ const colorMap: Record<string, { bg: string; text: string }> = {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
     flex-shrink: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .cert-badge-text {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
     letter-spacing: 0.04em;
   }
 
@@ -190,6 +204,16 @@ const colorMap: Record<string, { bg: string; text: string }> = {
     border-radius: 50%;
     background: var(--ink-5);
     flex-shrink: 0;
+  }
+  .cert-desc {
+    font-size: 12px;
+    color: var(--ink-4);
+    line-height: 1.6;
+    margin-top: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   /* Progress bar for in-progress certs */

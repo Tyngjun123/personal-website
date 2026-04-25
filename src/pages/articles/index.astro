@@ -2,6 +2,7 @@
 // src/pages/articles/index.astro
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import ArticleThumbnailIcon from '../../components/ArticleThumbnailIcon.astro';
 
 const allArticles = await getCollection('articles', ({ data }) => !data.draft);
 const articles = allArticles.sort(
@@ -22,38 +23,31 @@ const articles = allArticles.sort(
     {articles.length === 0 ? (
       <p class="empty">No articles yet — check back soon.</p>
     ) : (
-      <ul class="article-list">
-        {articles.map((article, i) => {
+      <ul class="articles-grid">
+        {articles.map((article) => {
           const date = new Date(article.data.publishedDate).toLocaleDateString('en-MY', {
-            year: 'numeric', month: 'short', day: 'numeric',
+            year: 'numeric', month: 'short',
           });
+          const catSlug = article.data.category.toLowerCase().replace(/\s+/g, '-');
           return (
-            <li class="article-item">
-              <a href={`/articles/${article.slug}`} class="article-link">
-                <div class="article-left">
-                  <span class="article-num">0{i + 1}</span>
-                  <div class="article-body">
-                    <div class="article-meta">
-                      <span class="article-cat">{article.data.category}</span>
-                      <span class="article-dot"></span>
-                      <time datetime={article.data.publishedDate}>{date}</time>
-                      {article.data.readTime && (
-                        <>
-                          <span class="article-dot"></span>
-                          <span>{article.data.readTime} read</span>
-                        </>
-                      )}
-                    </div>
-                    <h2 class="article-title">{article.data.title}</h2>
-                    <p class="article-desc">{article.data.description}</p>
-                    <div class="article-tags">
-                      {article.data.tags.slice(0, 4).map((tag: string) => (
-                        <span class="tag">{tag}</span>
-                      ))}
-                    </div>
+            <li>
+              <a href={`/articles/${article.slug}`} class="ac">
+                <div class={`ac-img ac-img--${catSlug}`}>
+                  {article.data.cover
+                    ? <img src={article.data.cover} alt={article.data.title} loading="lazy" />
+                    : <ArticleThumbnailIcon category={article.data.category} />
+                  }
+                  {article.data.featured && <div class="ac-img-bar"></div>}
+                </div>
+                <div class="ac-body">
+                  <span class={`ac-cat ac-cat--${catSlug}`}>{article.data.category}</span>
+                  <h2 class="ac-title">{article.data.title}</h2>
+                  <p class="ac-desc">{article.data.description}</p>
+                  <div class="ac-footer">
+                    <time class="ac-date">{date}</time>
+                    {article.data.readTime && <span class="ac-read">{article.data.readTime} read</span>}
                   </div>
                 </div>
-                <span class="article-arrow">→</span>
               </a>
             </li>
           );
@@ -100,117 +94,129 @@ const articles = allArticles.sort(
     color: var(--ink-4);
   }
 
-  .article-list {
+  /* ── 3-col card grid ── */
+  .articles-grid {
     list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .articles-grid li { display: flex; }
+
+  .ac {
     display: flex;
     flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--white);
+    text-decoration: none;
+    width: 100%;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+  .ac:hover {
+    border-color: transparent;
+    background: linear-gradient(var(--white), var(--white)) padding-box,
+                linear-gradient(135deg, #2563eb 0%, #6366f1 55%, #a855f7 100%) border-box;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(99, 102, 241, 0.12);
   }
 
-  .article-item {
+  /* Thumbnail area */
+  .ac-img {
+    height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
     border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    flex-shrink: 0;
   }
-  .article-item:first-child {
-    border-top: 1px solid var(--border);
+  .ac-img img { width: 100%; height: 100%; object-fit: cover; }
+  .ac-img-bar {
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--gradient-bar);
   }
+  .ac-img--automation,
+  .ac-img--n8n         { background: var(--blue-50); }
+  .ac-img--seo         { background: #f0fdf4; }
+  .ac-img--dev,
+  .ac-img--tutorial    { background: #f5f3ff; }
+  .ac-img--tools       { background: #fffbeb; }
+  .ac-img--productivity { background: #f0fdf4; }
+  .ac-img--notion      { background: #f5f3ff; }
+  .ac-img--database    { background: var(--blue-50); }
 
-  .article-link {
+  /* Card body */
+  .ac-body {
+    padding: 14px;
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 24px 0;
-    transition: opacity 0.15s;
-  }
-  .article-link:hover { opacity: 0.75; }
-  .article-link:hover .article-arrow { transform: translateX(3px); }
-
-  .article-left {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
+    flex-direction: column;
     flex: 1;
   }
 
-  .article-num {
+  /* Category badge */
+  .ac-cat {
     font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--ink-4);
-    padding-top: 2px;
-    width: 20px;
-    flex-shrink: 0;
-  }
-
-  .article-body { flex: 1; }
-
-  .article-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--ink-3);
-    margin-bottom: 8px;
-    font-family: var(--font-mono);
-    flex-wrap: wrap;
-  }
-  .article-cat {
-    font-size: 10px;
+    font-size: 0.65rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--blue-700);
-    background: var(--blue-50);
-    padding: 3px 9px;
+    padding: 2px 7px;
     border-radius: 4px;
-    font-family: var(--font-mono);
+    display: inline-block;
+    margin-bottom: 8px;
+    align-self: flex-start;
   }
-  .article-dot {
-    width: 3px; height: 3px;
-    border-radius: 50%;
-    background: var(--ink-5);
-  }
+  .ac-cat--automation,
+  .ac-cat--n8n         { color: var(--blue-700); background: var(--blue-50); }
+  .ac-cat--seo         { color: #065f46; background: #d1fae5; }
+  .ac-cat--dev,
+  .ac-cat--tutorial    { color: #5b21b6; background: #ede9fe; }
+  .ac-cat--tools       { color: #92400e; background: #fef3c7; }
+  .ac-cat--productivity { color: #065f46; background: #d1fae5; }
+  .ac-cat--notion      { color: #5b21b6; background: #ede9fe; }
+  .ac-cat--database    { color: var(--blue-700); background: var(--blue-50); }
 
-  .article-title {
+  .ac-title {
     font-family: var(--font-display);
-    font-size: 15px;
+    font-size: 13.5px;
     font-weight: 600;
     color: var(--ink);
     line-height: 1.4;
     margin-bottom: 6px;
   }
 
-  .article-desc {
-    font-size: 13px;
+  .ac-desc {
+    font-size: 12px;
     color: var(--ink-3);
-    line-height: 1.65;
-    margin-bottom: 10px;
-    max-width: 620px;
+    line-height: 1.6;
+    flex: 1;
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  .article-tags {
+  .ac-footer {
     display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
   }
-  .tag {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--ink-3);
-    background: var(--bg);
-    border: 1px solid var(--border);
-    padding: 2px 8px;
-    border-radius: 20px;
-  }
+  .ac-date,
+  .ac-read { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-4); }
 
-  .article-arrow {
-    font-size: 16px;
-    color: var(--ink-4);
-    padding-top: 20px;
-    flex-shrink: 0;
-    transition: transform 0.15s;
+  @media (max-width: 900px) {
+    .articles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
-
-  @media (max-width: 600px) {
-    .article-arrow { display: none; }
-    .article-left { gap: 10px; }
+  @media (max-width: 540px) {
+    .articles-grid { grid-template-columns: 1fr; }
+    .page-body { padding: 24px 1rem 3rem; }
   }
 </style>

@@ -29,7 +29,7 @@ const colorMap: Record<string, { bg: string; text: string }> = {
     {certs.length === 0 ? (
       <p class="empty">No certificates yet — check back soon.</p>
     ) : (
-      <ul class="cert-list">
+      <ul class="cert-grid">
         {certs.map(cert => {
           const color = colorMap[cert.data.color] ?? colorMap.gray;
           const date = new Date(cert.data.issuedDate + '-01').toLocaleDateString('en-MY', {
@@ -40,63 +40,64 @@ const colorMap: Record<string, { bg: string; text: string }> = {
             : null;
           const Tag = cert.data.credentialUrl ? 'a' : 'div';
           return (
-            <Tag
-              class="cert-item"
-              href={cert.data.credentialUrl ?? undefined}
-              target={cert.data.credentialUrl ? '_blank' : undefined}
-              rel={cert.data.credentialUrl ? 'noopener noreferrer' : undefined}
-            >
-              <div class="cert-badge" style={`background:${color.bg}`}>
-                {cert.data.logo ? (
-                  <img
-                    src={cert.data.logo}
-                    alt={cert.data.issuerShort}
-                    width="36" height="36"
-                    style="object-fit:contain; border-radius:6px;"
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-                  />
-                ) : null}
-                <span
-                  class="cert-badge-text"
-                  style={`color:${color.text}; display:${cert.data.logo ? 'none' : 'block'}`}
-                >
-                  {cert.data.issuerShort}
-                </span>
-              </div>
-              <div class="cert-info">
-                <div class="cert-name">{cert.data.name}</div>
-                <div class="cert-meta">
-                  <span>{cert.data.issuer}</span>
-                  <span class="cert-dot"></span>
-                  <span>Issued {date}</span>
-                  {expiry && (
-                    <>
-                      <span class="cert-dot"></span>
-                      <span>Expires {expiry}</span>
-                    </>
+            <li>
+              <Tag
+                class="cert-card"
+                href={cert.data.credentialUrl ?? undefined}
+                target={cert.data.credentialUrl ? '_blank' : undefined}
+                rel={cert.data.credentialUrl ? 'noopener noreferrer' : undefined}
+              >
+                {/* Logo / badge */}
+                <div class="cert-logo" style={`background:${color.bg}`}>
+                  {cert.data.logo ? (
+                    <img
+                      src={cert.data.logo}
+                      alt={cert.data.issuerShort}
+                      width="40" height="40"
+                      style="object-fit:contain; border-radius:8px;"
+                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                    />
+                  ) : null}
+                  <span
+                    class="cert-logo-text"
+                    style={`color:${color.text}; display:${cert.data.logo ? 'none' : 'flex'}`}
+                  >
+                    {cert.data.issuerShort}
+                  </span>
+                </div>
+
+                {/* Main content */}
+                <div class="cert-body">
+                  <div class="cert-name">{cert.data.name}</div>
+                  <div class="cert-issuer">{cert.data.issuer}</div>
+                  <div class="cert-dates">
+                    <span>Issued {date}</span>
+                    {expiry && <span>· Expires {expiry}</span>}
+                  </div>
+                  {cert.data.description && (
+                    <p class="cert-desc">{cert.data.description}</p>
+                  )}
+                  {cert.data.inProgress && (
+                    <div class="cert-progress-wrap">
+                      <div class="cert-progress-track">
+                        <div class="cert-progress-fill" style={`width: ${cert.data.progress ?? 50}%`}></div>
+                      </div>
+                      <span class="cert-progress-label">In progress · {cert.data.progress ?? 50}%</span>
+                    </div>
                   )}
                 </div>
-                {cert.data.description && (
-                  <p class="cert-desc">{cert.data.description}</p>
-                )}
-                {cert.data.inProgress && (
-                  <div class="cert-progress-wrap">
-                    <div class="cert-progress-track">
-                      <div class="cert-progress-fill" style={`width: ${cert.data.progress ?? 50}%`}></div>
-                    </div>
-                    <span class="cert-progress-label">In progress · {cert.data.progress ?? 50}%</span>
-                  </div>
-                )}
-              </div>
-              <div class="cert-right">
-                <span class="cert-cat">{cert.data.category}</span>
-                {cert.data.credentialUrl ? (
-                  <span class="cert-link">Verify ↗</span>
-                ) : (
-                  <span class="cert-verified">✓ Verified</span>
-                )}
-              </div>
-            </Tag>
+
+                {/* Footer */}
+                <div class="cert-footer">
+                  <span class="cert-cat">{cert.data.category}</span>
+                  {cert.data.credentialUrl ? (
+                    <span class="cert-verify">Verify ↗</span>
+                  ) : (
+                    <span class="cert-verified">✓ Verified</span>
+                  )}
+                </div>
+              </Tag>
+            </li>
           );
         })}
       </ul>
@@ -141,30 +142,42 @@ const colorMap: Record<string, { bg: string; text: string }> = {
     color: var(--ink-4);
   }
 
-  .cert-list {
+  /* ── 3-col card grid ── */
+  .cert-grid {
     list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .cert-grid li { display: flex; }
+
+  .cert-card {
     display: flex;
     flex-direction: column;
-  }
-
-  .cert-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 20px;
-    padding: 20px 0;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.15s;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    background: var(--white);
     text-decoration: none;
     color: inherit;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   }
-  .cert-item:first-child { border-top: 1px solid var(--border); }
-  a.cert-item { cursor: pointer; }
-  a.cert-item:hover { background: var(--blue-50); padding-left: 8px; padding-right: 8px; margin: 0 -8px; border-radius: var(--radius); border-bottom-color: transparent; }
-  a.cert-item:focus-visible { outline: 2px solid var(--blue-400); outline-offset: 2px; border-radius: var(--radius); }
+  a.cert-card:hover {
+    border-color: var(--blue-200);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.10);
+    transform: translateY(-3px);
+  }
+  a.cert-card:focus-visible {
+    outline: 2px solid var(--blue-400);
+    outline-offset: 2px;
+    border-radius: var(--radius-lg);
+  }
 
-  .cert-badge {
-    width: 52px;
-    height: 52px;
+  /* Logo area */
+  .cert-logo {
+    width: 56px;
+    height: 56px;
     border-radius: var(--radius);
     display: flex;
     align-items: center;
@@ -172,59 +185,65 @@ const colorMap: Record<string, { bg: string; text: string }> = {
     flex-shrink: 0;
     overflow: hidden;
     border: 1px solid var(--border);
+    margin-bottom: 14px;
   }
-  .cert-badge-text {
+  .cert-logo-text {
     font-family: var(--font-mono);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.04em;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4px;
   }
 
-  .cert-info {
-    flex: 1;
-    min-width: 0;
-  }
+  /* Body */
+  .cert-body { flex: 1; }
+
   .cert-name {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--ink);
+    line-height: 1.4;
     margin-bottom: 4px;
   }
-  .cert-meta {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  .cert-issuer {
     font-family: var(--font-mono);
     font-size: 11px;
-    color: var(--ink-3);
-    flex-wrap: wrap;
+    font-weight: 500;
+    color: var(--blue-600);
+    margin-bottom: 4px;
   }
-  .cert-dot {
-    width: 3px; height: 3px;
-    border-radius: 50%;
-    background: var(--ink-5);
-    flex-shrink: 0;
+  .cert-dates {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--ink-4);
+    margin-bottom: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
   }
   .cert-desc {
-    font-size: 12px;
+    font-size: 11.5px;
     color: var(--ink-4);
     line-height: 1.6;
-    margin-top: 6px;
+    margin-bottom: 12px;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
-  /* Progress bar for in-progress certs */
+  /* Progress bar */
   .cert-progress-wrap {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 8px;
+    margin-bottom: 12px;
   }
   .cert-progress-track {
-    width: 120px;
+    flex: 1;
     height: 4px;
     background: var(--blue-100);
     border-radius: 4px;
@@ -240,14 +259,18 @@ const colorMap: Record<string, { bg: string; text: string }> = {
     font-family: var(--font-mono);
     font-size: 10px;
     color: var(--blue-500);
+    white-space: nowrap;
   }
 
-  .cert-right {
+  /* Footer */
+  .cert-footer {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
-    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
   }
   .cert-cat {
     font-family: var(--font-mono);
@@ -259,7 +282,7 @@ const colorMap: Record<string, { bg: string; text: string }> = {
     padding: 3px 9px;
     border-radius: 20px;
   }
-  .cert-link {
+  .cert-verify {
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 600;
@@ -268,9 +291,7 @@ const colorMap: Record<string, { bg: string; text: string }> = {
     border: 1px solid var(--green-border);
     padding: 3px 10px;
     border-radius: 4px;
-    transition: opacity 0.15s;
   }
-  .cert-link:hover { opacity: 0.8; }
   .cert-verified {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -278,159 +299,11 @@ const colorMap: Record<string, { bg: string; text: string }> = {
     color: var(--green);
   }
 
-  @media (max-width: 600px) {
-    .cert-item { flex-wrap: wrap; }
-    .cert-right { flex-direction: row; align-items: center; width: 100%; }
+  @media (max-width: 900px) {
+    .cert-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 540px) {
+    .cert-grid { grid-template-columns: 1fr; }
+    .page-body { padding: 24px 1rem 3rem; }
   }
 </style>
-
-<script is:inline>
-  // ── Modal controller ──────────────────────────────────
-  const backdrop = document.getElementById('modal-backdrop');
-  const panel    = document.getElementById('modal-panel');
-  const closeBtn = document.getElementById('modal-close');
-
-  function openModal() {
-    backdrop.classList.add('open');
-    panel.classList.add('open');
-    panel.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => closeBtn && closeBtn.focus(), 50);
-  }
-  function closeModal() {
-    backdrop.classList.remove('open');
-    panel.classList.remove('open');
-    panel.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-  }
-
-  backdrop && backdrop.addEventListener('click', closeModal);
-  closeBtn && closeBtn.addEventListener('click', closeModal);
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && panel && panel.classList.contains('open')) closeModal();
-  });
-
-  // Swipe-down to close (mobile)
-  var touchStartY = 0;
-  panel && panel.addEventListener('touchstart', function(e) {
-    touchStartY = e.touches[0].clientY;
-  }, { passive: true });
-  panel && panel.addEventListener('touchmove', function(e) {
-    var dy = e.touches[0].clientY - touchStartY;
-    if (dy > 0 && panel.scrollTop === 0) {
-      panel.style.transform = 'translateY(' + Math.min(dy * 0.4, 80) + 'px)';
-    }
-  }, { passive: true });
-  panel && panel.addEventListener('touchend', function(e) {
-    var dy = e.changedTouches[0].clientY - touchStartY;
-    panel.style.transform = '';
-    if (dy > 80) closeModal();
-  });
-
-  function setText(id, value) {
-    var el = document.getElementById(id);
-    if (el) el.textContent = value || '';
-  }
-  function setHTML(id, value) {
-    var el = document.getElementById(id);
-    if (el) el.innerHTML = value || '';
-  }
-  function show(id) {
-    var el = document.getElementById(id);
-    if (el) el.style.display = '';
-  }
-  function hide(id) {
-    var el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  }
-
-  // ── Certificate modal ────────────────────────────────
-  function openCertModal(data) {
-    setText('modal-tag', data.category || '');
-
-    var statusEl = document.getElementById('modal-status');
-    if (statusEl) {
-      if (data.inProgress === 'true') {
-        statusEl.textContent = 'In Progress';
-        statusEl.className = 'modal-status progress';
-        statusEl.style.display = '';
-      } else {
-        statusEl.textContent = 'Verified';
-        statusEl.className = 'modal-status live';
-        statusEl.style.display = '';
-      }
-    }
-
-    hide('modal-cover');
-
-    setText('modal-title', data.name);
-    setText('modal-desc', '');
-
-    hide('modal-metrics');
-
-    var contentHTML = '<p class="modal-cert-issuer">' + (data.issuer || '') + '</p>';
-    contentHTML += '<div class="modal-cert-date">';
-    contentHTML += '<div class="modal-cert-date-item">';
-    contentHTML += '<span class="modal-cert-date-label">Issued</span>';
-    contentHTML += '<span class="modal-cert-date-val">' + (data.issuedDate || '—') + '</span>';
-    contentHTML += '</div>';
-    if (data.expiryDate) {
-      contentHTML += '<div class="modal-cert-date-item">';
-      contentHTML += '<span class="modal-cert-date-label">Expires</span>';
-      contentHTML += '<span class="modal-cert-date-val">' + data.expiryDate + '</span>';
-      contentHTML += '</div>';
-    }
-    contentHTML += '</div>';
-    if (data.description) {
-      contentHTML += '<p class="modal-prose">' + data.description + '</p>';
-    }
-    if (data.inProgress === 'true' && data.progress && parseInt(data.progress) > 0) {
-      contentHTML += '<p class="modal-section-label">Progress</p>' +
-        '<div style="display:flex;align-items:center;gap:10px;margin-top:4px;">' +
-          '<div style="flex:1;height:6px;background:var(--blue-100);border-radius:4px;overflow:hidden;">' +
-            '<div style="height:6px;width:' + data.progress + '%;background:var(--blue-500);border-radius:4px;"></div>' +
-          '</div>' +
-          '<span style="font-family:var(--font-mono);font-size:11px;color:var(--blue-500);">' + data.progress + '%</span>' +
-        '</div>';
-    }
-    setHTML('modal-content', contentHTML);
-
-    hide('modal-stack');
-
-    if (data.credentialUrl) {
-      setHTML('modal-links', '<a href="' + data.credentialUrl + '" target="_blank" rel="noopener" class="modal-link-btn primary">Verify credential →</a>');
-      show('modal-links');
-    } else {
-      hide('modal-links');
-    }
-
-    openModal();
-  }
-
-  // ── Bind cert items ───────────────────────────────────
-  document.querySelectorAll('[data-modal="cert"]').forEach(function(item) {
-    function open() {
-      openCertModal({
-        name:          item.dataset.name,
-        issuer:        item.dataset.issuer,
-        issuerShort:   item.dataset.issuerShort,
-        category:      item.dataset.category,
-        color:         item.dataset.color,
-        issuedDate:    item.dataset.issuedDate,
-        expiryDate:    item.dataset.expiryDate || '',
-        credentialUrl: item.dataset.credentialUrl || '',
-        description:   item.dataset.description || '',
-        inProgress:    item.dataset.inProgress,
-        progress:      item.dataset.progress,
-      });
-    }
-    // Don't trigger modal when clicking the Verify link directly
-    item.addEventListener('click', function(e) {
-      if (e.target.closest('a')) return;
-      open();
-    });
-    item.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
-    });
-  });
-</script>

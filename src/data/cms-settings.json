@@ -1,64 +1,64 @@
 {
-  "name": "TJ test",
-  "title": "this is title",
-  "description": "test",
-  "url": "https://yourdomain.com",
-  "author": "TJ",
-  "authorRole": "this is my role",
-  "authorBio": "can u check hao hao",
-  "location": "Malaysia",
-  "email": "hello@yourdomain.com",
+  "name": "TJ Wong",
+  "title": "TJ Wong — Senior Product Owner & Automation Engineer Malaysia",
+  "description": "Senior Product Owner and automation engineer based in Malaysia. I build n8n workflows, WhatsApp bots, and Notion systems that eliminate manual work for businesses.",
+  "url": "https://tj-portfolio-coral.vercel.app",
+  "author": "TJ Wong",
+  "authorRole": "Senior Product Owner · Automation Engineer",
+  "authorBio": "Senior Product Owner at MyAtlas Digital. I build automation systems using n8n, WhatsApp API, MySQL and Notion — turning repetitive manual work into zero-touch workflows.",
+  "location": "Subang Jaya, Malaysia",
+  "email": "tyngjun123@gmail.com",
   "locale": "en_MY",
   "themeColor": "#ffffff",
-  "twitterHandle": "@yourhandle",
+  "twitterHandle": "@tyngjunwong",
   "ogImage": "/images/og-default.jpg",
   "social": {
-    "github": "https://github.com/yourhandle",
-    "linkedin": "https://linkedin.com/in/yourhandle",
-    "twitter": "https://twitter.com/yourhandle",
-    "facebook": "https://linkedin.com/in/yourhandle",
-    "instagram": "https://linkedin.com/in/yourhandle",
+    "github": "https://github.com/Tyngjun123",
+    "linkedin": "https://www.linkedin.com/in/tyngjunwong/",
+    "twitter": "",
+    "facebook": "",
+    "instagram": "",
     "tiktok": "",
-    "youtube": "https://linkedin.com/in/yourhandle"
+    "youtube": ""
   },
   "workExperience": [
     {
-      "company": "cincai work",
-      "role": "Product Owner · Automation Engineer",
-      "period": "2022 – Present",
+      "company": "MyAtlas Digital",
+      "role": "Senior Product Owner",
+      "period": "Mar 2025 – Present",
       "current": true,
-      "description": "Leading automation strategy across promotions, lead management, and member communications. Built 20+ n8n workflows eliminating thousands of manual hours annually.",
-      "tags": [
-        "n8n",
-        "MySQL",
-        "WhatsApp API",
-        "Telegram Bot",
-        "Notion",
-        "Product Strategy"
-      ]
+      "description": "Leading product strategy and automation initiatives. Building n8n workflows, WhatsApp bots, and Notion systems that eliminate manual work across operations, lead management, and member communications.",
+      "tags": ["n8n", "Product Strategy", "WhatsApp API", "Notion", "MySQL", "Automation"]
     },
     {
-      "company": "Previous Company",
-      "role": "Operations Manager",
-      "period": "2020 – 2022",
+      "company": "Spectre Tech Sdn Bhd",
+      "role": "Business Analyst",
+      "period": "Feb 2023 – Feb 2025",
       "current": false,
-      "description": "Managed cross-functional teams and streamlined internal processes. First exposure to workflow automation and API integrations that sparked a passion for systematic efficiency.",
-      "tags": [
-        "Operations",
-        "Process Design",
-        "Team Management",
-        "Project Coordination"
-      ]
+      "description": "Conducted IT business analysis and project estimation for client-facing software projects. Bridged communication between technical teams and stakeholders to deliver on-scope solutions.",
+      "tags": ["IT Business Analysis", "Project Estimation", "Requirements Gathering", "Stakeholder Management"]
+    },
+    {
+      "company": "ISJ Technology Sdn Bhd",
+      "role": "Project Coordinator",
+      "period": "Dec 2021 – Jan 2023",
+      "current": false,
+      "description": "Coordinated cross-functional project delivery across technology engagements. Managed timelines, resources, and client expectations for software implementation projects.",
+      "tags": ["Microsoft Excel", "Jira", "Project Coordination", "Client Management"]
     }
   ],
   "education": [
     {
-      "school": "university name 1",
-      "degree": "Bachelor's Degree",
-      "period": "2016",
-      "tags": [
-        "afdsfsfsdd"
-      ]
+      "school": "Tunku Abdul Rahman University of Management and Technology",
+      "degree": "Bachelor's Degree, Computer Science (CGPA 3.61)",
+      "period": "Jun 2019 – Jun 2021",
+      "tags": ["Computer Science", "Presentation Skills"]
+    },
+    {
+      "school": "Tunku Abdul Rahman University of Management and Technology",
+      "degree": "Diploma, Information System Engineering",
+      "period": "May 2017 – May 2019",
+      "tags": ["Information Systems", "Software Engineering"]
     }
   ]
 }

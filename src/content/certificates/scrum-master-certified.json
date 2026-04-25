@@ -1,0 +1,12 @@
+{
+  "name": "Scrum Master Certified (SMC)",
+  "issuer": "VMEdu / SCRUMstudy",
+  "issuerShort": "VMEdu",
+  "category": "Product",
+  "color": "purple",
+  "issuedDate": "2024-09",
+  "expiryDate": "2027-09",
+  "credentialUrl": "https://www.scrumstudy.com/certification/verify?type=SMC&number=1039979",
+  "featured": true,
+  "description": "Demonstrates expertise in Scrum principles, sprint planning, backlog management, and guiding teams through agile delivery cycles as a certified Scrum Master."
+}

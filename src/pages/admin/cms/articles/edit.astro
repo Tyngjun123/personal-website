@@ -129,8 +129,8 @@ const title = isEdit ? `Edit: ${fields.title || slugParam}` : 'New article';
             <input name="keywords" value={fields.keywords} placeholder="n8n automation Malaysia" />
           </div>
           <div class="field">
-            <label>Cover image URL</label>
-            <input name="cover" value={fields.cover ?? ''} placeholder="/images/articles/my-cover.jpg" />
+            <label>Cover image URL <a href="/admin/upload" target="_blank" class="upload-hint">Upload image ↗</a></label>
+            <input name="cover" value={fields.cover ?? ''} placeholder="https://... (use Upload to get URL)" />
           </div>
           <div class="field">
             <label>Read time</label>
@@ -161,6 +161,8 @@ const title = isEdit ? `Edit: ${fields.title || slugParam}` : 'New article';
   .edit-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem; }
   .back-link,.view-link { font-size:.8rem;color:#4b5563;transition:color .15s; }
   .back-link:hover,.view-link:hover { color:#9ca3af; }
+  .upload-hint { font-size:.7rem;color:#4b5563;margin-left:8px;transition:color .15s; }
+  .upload-hint:hover { color:#9ca3af; }
 
   .notice { background:#1a1200;border:1px solid #3d2e00;color:#fbbf24;padding:.875rem 1rem;border-radius:8px;margin-bottom:1.25rem;font-size:.82rem; }
   .alert { padding:.75rem 1rem;border-radius:6px;font-size:.82rem;margin-bottom:1.25rem; }

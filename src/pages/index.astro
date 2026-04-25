@@ -244,19 +244,39 @@ const allJourneyItems = [
 
       <div class="projects-grid">
         {featuredProjects.length > 0 ? featuredProjects.map((project, i) => (
-          <div class:list={['proj-card', { 'proj-featured': i < 2 }]}>
+          <div
+            class:list={['proj-card', { 'proj-featured': i < 2 }]}
+            role="button"
+            tabindex="0"
+            data-modal="project"
+            data-title={project.data.title}
+            data-description={project.data.description}
+            data-category={project.data.category}
+            data-status={project.data.status ?? ''}
+            data-tags={JSON.stringify(project.data.tags)}
+            data-cover={project.data.cover ?? ''}
+            data-metrics={JSON.stringify(project.data.metrics ?? [])}
+            data-links={JSON.stringify(project.data.links ?? {})}
+            data-problem={project.data.problem ?? ''}
+            data-solution={project.data.solution ?? ''}
+            data-outcomes={JSON.stringify(project.data.outcomes ?? [])}
+          >
             {i < 2 && <div class="proj-top-bar" aria-hidden="true"></div>}
             <div class="proj-blob" aria-hidden="true"></div>
             <span class="proj-tag">{project.data.category}</span>
             <h3 class="proj-title">{project.data.title}</h3>
             <p class="proj-desc">{project.data.description}</p>
             <div class="proj-stack">
-              {project.data.tags.slice(0, 4).map((tag: string) => (
+              {project.data.tags.slice(0, 3).map((tag: string) => (
                 <span class="stack-pill">{tag}</span>
               ))}
             </div>
             {project.data.metrics && project.data.metrics.length > 0 && (
-              <span class="result-badge">✓ {project.data.metrics[0].value} {project.data.metrics[0].label}</span>
+              <div class="proj-highlights">
+                {project.data.metrics.slice(0, 3).map((m: { value: string; label: string }) => (
+                  <span class="result-badge">✓ {m.value} {m.label}</span>
+                ))}
+              </div>
             )}
           </div>
         )) : (
@@ -597,6 +617,111 @@ const allJourneyItems = [
   }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
   document.querySelectorAll('.reveal-section').forEach(function(el) {
     revealObserver.observe(el);
+  });
+
+  // ── Homepage project cards → modal ────────────────────
+  var mBackdrop = document.getElementById('modal-backdrop');
+  var mPanel    = document.getElementById('modal-panel');
+  var mClose    = document.getElementById('modal-close');
+
+  function mOpen() {
+    if (!mBackdrop || !mPanel) return;
+    mBackdrop.classList.add('open');
+    mPanel.classList.add('open');
+    mPanel.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function() { mClose && mClose.focus(); }, 50);
+  }
+  function mClose_() {
+    if (!mBackdrop || !mPanel) return;
+    mBackdrop.classList.remove('open');
+    mPanel.classList.remove('open');
+    mPanel.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  mBackdrop && mBackdrop.addEventListener('click', mClose_);
+  mClose    && mClose.addEventListener('click', mClose_);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && mPanel && mPanel.classList.contains('open')) mClose_();
+  });
+  var mTouchY = 0;
+  if (mPanel) {
+    mPanel.addEventListener('touchstart', function(e) { mTouchY = e.touches[0].clientY; }, { passive: true });
+    mPanel.addEventListener('touchmove', function(e) {
+      var dy = e.touches[0].clientY - mTouchY;
+      if (dy > 0 && mPanel.scrollTop === 0) mPanel.style.transform = 'translateY(' + Math.min(dy * 0.4, 80) + 'px)';
+    }, { passive: true });
+    mPanel.addEventListener('touchend', function(e) {
+      var dy = e.changedTouches[0].clientY - mTouchY;
+      mPanel.style.transform = '';
+      if (dy > 80) mClose_();
+    });
+  }
+
+  function mTxt(id, v) { var el = document.getElementById(id); if (el) el.textContent = v || ''; }
+  function mHTML(id, v) { var el = document.getElementById(id); if (el) el.innerHTML = v || ''; }
+  function mShow(id) { var el = document.getElementById(id); if (el) el.style.display = ''; }
+  function mHide(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; }
+
+  function openProjModal(d) {
+    mTxt('modal-tag', d.category || '');
+    var s = document.getElementById('modal-status');
+    if (s) {
+      s.textContent = d.status || '';
+      s.className = 'modal-status' + (d.status === 'Live' ? ' live' : d.status === 'In Progress' ? ' progress' : '');
+      s.style.display = d.status ? '' : 'none';
+    }
+    if (d.cover) {
+      var img = document.getElementById('modal-cover-img');
+      if (img) { img.src = d.cover; img.alt = d.title; }
+      mShow('modal-cover');
+    } else { mHide('modal-cover'); }
+    mTxt('modal-title', d.title);
+    mTxt('modal-desc', d.description);
+    if (d.metrics && d.metrics.length) {
+      mHTML('modal-metrics', d.metrics.map(function(m) {
+        return '<div class="modal-metric-card"><div class="modal-metric-val">' + m.value + '</div><div class="modal-metric-label">' + m.label + '</div></div>';
+      }).join(''));
+      mShow('modal-metrics');
+    } else { mHide('modal-metrics'); }
+    var c = '';
+    if (d.problem)  c += '<p class="modal-section-label">The problem</p><p class="modal-prose">' + d.problem + '</p>';
+    if (d.solution) c += '<p class="modal-section-label">How it works</p><p class="modal-prose">' + d.solution + '</p>';
+    if (d.outcomes && d.outcomes.length) {
+      c += '<p class="modal-section-label">Outcomes</p><div class="modal-outcome-list">' +
+        d.outcomes.map(function(o) { return '<div class="modal-outcome-item"><div class="modal-outcome-dot"></div><span>' + o + '</span></div>'; }).join('') + '</div>';
+    }
+    mHTML('modal-content', c);
+    if (d.tags && d.tags.length) {
+      mHTML('modal-stack-pills', d.tags.map(function(t) { return '<span class="modal-pill">' + t + '</span>'; }).join(''));
+      mShow('modal-stack');
+    } else { mHide('modal-stack'); }
+    var lk = '';
+    if (d.links && d.links.demo)   lk += '<a href="' + d.links.demo   + '" target="_blank" rel="noopener" class="modal-link-btn primary">View demo →</a>';
+    if (d.links && d.links.github) lk += '<a href="' + d.links.github + '" target="_blank" rel="noopener" class="modal-link-btn">GitHub →</a>';
+    lk ? (mHTML('modal-links', lk), mShow('modal-links')) : mHide('modal-links');
+    mOpen();
+  }
+
+  document.querySelectorAll('[data-modal="project"]').forEach(function(card) {
+    card.addEventListener('click', function() {
+      openProjModal({
+        title:       card.dataset.title,
+        description: card.dataset.description,
+        category:    card.dataset.category,
+        status:      card.dataset.status,
+        tags:        JSON.parse(card.dataset.tags    || '[]'),
+        cover:       card.dataset.cover || null,
+        metrics:     JSON.parse(card.dataset.metrics || '[]'),
+        links:       JSON.parse(card.dataset.links   || '{}'),
+        problem:     card.dataset.problem  || '',
+        solution:    card.dataset.solution || '',
+        outcomes:    JSON.parse(card.dataset.outcomes || '[]'),
+      });
+    });
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
+    });
   });
 </script>
 
@@ -1080,8 +1205,9 @@ const allJourneyItems = [
   .proj-desc { font-size: 12px; color: var(--ink-3); line-height: 1.65; margin-bottom: 12px; }
   .proj-stack { display: flex; flex-wrap: wrap; gap: 5px; }
   .stack-pill { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); background: var(--bg); border: 1px solid var(--border); padding: 2px 8px; border-radius: 20px; }
+  .proj-highlights { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .result-badge {
-    display: inline-block; margin-top: 8px;
+    display: inline-block;
     font-family: var(--font-mono); font-size: 11px; font-weight: 500;
     color: var(--green); background: var(--green-bg); border: 1px solid var(--green-border);
     padding: 3px 9px; border-radius: 4px;
@@ -1145,7 +1271,20 @@ const allJourneyItems = [
   /* ── Responsive ── */
   @media (max-width: 640px) {
     .projects-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .proj-card { padding: 12px; }
+    .proj-card { padding: 12px; cursor: pointer; }
+    .proj-blob { width: 50px; height: 50px; top: -16px; right: -16px; }
+    .proj-title {
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .proj-desc {
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+      font-size: 11px;
+    }
+    .proj-stack { display: none; }
+    .proj-highlights { gap: 4px; margin-top: 4px; }
+    .result-badge { font-size: 10px; padding: 2px 6px; }
     .articles-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
     .article-card-img { height: 90px; }
     .article-card-body { padding: 10px; }

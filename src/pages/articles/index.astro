@@ -216,7 +216,11 @@ const articles = allArticles.sort(
     .articles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 540px) {
-    .articles-grid { grid-template-columns: 1fr; }
+    .articles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .ac-img { height: 80px; }
+    .ac-body { padding: 10px; }
+    .ac-title { font-size: 12px; }
+    .ac-desc { -webkit-line-clamp: 2; font-size: 11px; }
     .page-body { padding: 24px 1rem 3rem; }
   }
 </style>

@@ -426,7 +426,114 @@ const allJourneyItems = [
     </div>
   </section>
 
+  <!-- ══ FAQ ══ -->
+  <section class="section-faq reveal-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="eyebrow">// faq</span>
+        <h2 class="section-title">Frequently Asked <span class="title-grad">Questions</span></h2>
+      </div>
+      <div class="faq-list">
+        {[
+          {
+            q: "What automation services do you offer?",
+            a: "I build end-to-end automation systems using n8n, WhatsApp Business API, Telegram bots, MySQL, and Notion. Common projects include lead management pipelines, multi-channel notification systems, CRM automations, and SEO content generation workflows.",
+          },
+          {
+            q: "What tools do you use for automation?",
+            a: "My primary stack is n8n for workflow orchestration, MySQL for data storage, WhatsApp Business API and Telegram Bot API for messaging, Notion for knowledge management, and Google Sheets for lightweight reporting. I also integrate with Gemini API for AI-powered workflows.",
+          },
+          {
+            q: "Can you build automation for small businesses in Malaysia?",
+            a: "Yes — I specialize in cost-effective automation tailored for Malaysian businesses. Whether you're running an SME, e-commerce, or a service business, I can design workflows that reduce manual work without requiring expensive enterprise tools.",
+          },
+          {
+            q: "How long does it take to build an automation workflow?",
+            a: "Simple, single-trigger workflows typically take 1–3 days. More complex multi-system integrations with conditional logic, error handling, and dashboards take 1–2 weeks. I always start with a scoping session to give an accurate timeline.",
+          },
+          {
+            q: "Do you take on freelance or consulting projects?",
+            a: "Yes, I'm open to freelance projects and consulting engagements. I work best with businesses that have a clear manual process they want to automate. Reach out via WhatsApp or email to discuss your project.",
+          },
+          {
+            q: "What is n8n and why do you prefer it over Zapier?",
+            a: "n8n is an open-source workflow automation tool that can be self-hosted, making it significantly more cost-effective than Zapier or Make for businesses processing high volumes of tasks. It offers greater flexibility, custom code nodes, and no per-task pricing — ideal for production-grade automations.",
+          },
+        ].map((item) => (
+          <details class="faq-item">
+            <summary class="faq-q">
+              <span>{item.q}</span>
+              <span class="faq-chevron" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </span>
+            </summary>
+            <p class="faq-a">{item.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
 </BaseLayout>
+
+<script type="application/ld+json" is:inline>
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What automation services do you offer?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "I build end-to-end automation systems using n8n, WhatsApp Business API, Telegram bots, MySQL, and Notion. Common projects include lead management pipelines, multi-channel notification systems, CRM automations, and SEO content generation workflows."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What tools do you use for automation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "My primary stack is n8n for workflow orchestration, MySQL for data storage, WhatsApp Business API and Telegram Bot API for messaging, Notion for knowledge management, and Google Sheets for lightweight reporting. I also integrate with Gemini API for AI-powered workflows."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can you build automation for small businesses in Malaysia?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — I specialize in cost-effective automation tailored for Malaysian businesses. Whether you're running an SME, e-commerce, or a service business, I can design workflows that reduce manual work without requiring expensive enterprise tools."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does it take to build an automation workflow?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Simple, single-trigger workflows typically take 1–3 days. More complex multi-system integrations with conditional logic, error handling, and dashboards take 1–2 weeks. I always start with a scoping session to give an accurate timeline."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you take on freelance or consulting projects?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, I'm open to freelance projects and consulting engagements. I work best with businesses that have a clear manual process they want to automate. Reach out via WhatsApp or email to discuss your project."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is n8n and why do you prefer it over Zapier?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "n8n is an open-source workflow automation tool that can be self-hosted, making it significantly more cost-effective than Zapier or Make for businesses processing high volumes of tasks. It offers greater flexibility, custom code nodes, and no per-task pricing — ideal for production-grade automations."
+      }
+    }
+  ]
+}
+</script>
 
 <script is:inline>
   // ── Typewriter ────────────────────────────────────────
@@ -1037,10 +1144,20 @@ const allJourneyItems = [
 
   /* ── Responsive ── */
   @media (max-width: 640px) {
-    .projects-grid { grid-template-columns: 1fr; }
+    .projects-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .proj-card { padding: 12px; }
+    .articles-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .article-card-img { height: 90px; }
+    .article-card-body { padding: 10px; }
+    .jt-tags { display: none; }
     .ticker-item { padding: 0 18px; font-size: 10px; }
     .section-header--row { flex-direction: column; align-items: flex-start; gap: 8px; }
     .timeline-card:hover { transform: none; }
+    .journey-section { padding: 28px 0; }
+    .section-skills { padding: 24px 0; }
+    .section-projects { padding: 24px 0; }
+    .section-articles { padding: 24px 0; }
+    .section-contact { padding: 40px 0; }
   }
 
   /* ── Contact / CTA ── */
@@ -1161,5 +1278,39 @@ const allJourneyItems = [
   }
   .contact-card:hover .contact-card-arrow {
     color: var(--blue-500); transform: translate(2px, -2px);
+  }
+
+  /* ── FAQ ── */
+  .section-faq { background: var(--white); padding: 48px 0; border-bottom: 1px solid var(--border); }
+  .faq-list { display: flex; flex-direction: column; }
+
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-item:first-child { border-top: 1px solid var(--border); }
+
+  .faq-q {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 18px 0; cursor: pointer;
+    font-size: 14px; font-weight: 600; color: var(--ink);
+    list-style: none; user-select: none;
+  }
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-q:hover { color: var(--blue-600); }
+
+  .faq-chevron {
+    color: var(--ink-4); flex-shrink: 0;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .faq-item[open] .faq-chevron { transform: rotate(180deg); color: var(--blue-500); }
+  .faq-item[open] .faq-q { color: var(--blue-600); }
+
+  .faq-a {
+    font-size: 13.5px; color: var(--ink-3); line-height: 1.75;
+    padding: 0 0 18px; max-width: 720px;
+  }
+
+  @media (max-width: 640px) {
+    .section-faq { padding: 24px 0; }
+    .faq-q { font-size: 13px; padding: 14px 0; }
+    .faq-a { font-size: 13px; }
   }
 </style>

@@ -150,13 +150,18 @@ const projects = allProjects.sort((a, b) => b.data.year - a.data.year);
       statusEl.style.display = data.status ? '' : 'none';
     }
 
+    var covImg  = document.getElementById('modal-cover-img');
+    var covGrad = document.getElementById('modal-cover-grad');
+    var covLbl  = document.getElementById('modal-cover-label');
     if (data.cover) {
-      var img = document.getElementById('modal-cover-img');
-      if (img) { img.src = data.cover; img.alt = data.title; }
-      show('modal-cover');
+      if (covImg)  { covImg.src = data.cover; covImg.alt = data.title; covImg.classList.add('visible'); }
+      if (covGrad) covGrad.style.display = 'none';
     } else {
-      hide('modal-cover');
+      if (covImg)  covImg.classList.remove('visible');
+      if (covGrad) covGrad.style.display = '';
+      if (covLbl)  covLbl.textContent = data.category || '';
     }
+    show('modal-cover');
 
     setText('modal-title', data.title);
     setText('modal-desc', data.description);

@@ -671,11 +671,18 @@ const allJourneyItems = [
       s.className = 'modal-status' + (d.status === 'Live' ? ' live' : d.status === 'In Progress' ? ' progress' : '');
       s.style.display = d.status ? '' : 'none';
     }
+    var covImg  = document.getElementById('modal-cover-img');
+    var covGrad = document.getElementById('modal-cover-grad');
+    var covLbl  = document.getElementById('modal-cover-label');
     if (d.cover) {
-      var img = document.getElementById('modal-cover-img');
-      if (img) { img.src = d.cover; img.alt = d.title; }
-      mShow('modal-cover');
-    } else { mHide('modal-cover'); }
+      if (covImg)  { covImg.src = d.cover; covImg.alt = d.title; covImg.classList.add('visible'); }
+      if (covGrad) covGrad.style.display = 'none';
+    } else {
+      if (covImg)  covImg.classList.remove('visible');
+      if (covGrad) covGrad.style.display = '';
+      if (covLbl)  covLbl.textContent = d.category || '';
+    }
+    mShow('modal-cover');
     mTxt('modal-title', d.title);
     mTxt('modal-desc', d.description);
     if (d.metrics && d.metrics.length) {
